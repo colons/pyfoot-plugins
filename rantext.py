@@ -1,14 +1,14 @@
 from random import choice
 from copy import copy
 
-import module
+import plugin
 
 
 defaults = {
         'rantext_sources': [],
         }
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     """ Retrieve a random line from a text file. Can be directed at individuals. """
     def register_commands(self):
         self.commands = []

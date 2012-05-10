@@ -1,9 +1,9 @@
 import json
 import urllib2
 
-import module
+import plugin 
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def prepare(self):
         self.url = 'http://api.duckduckgo.com/?q=%s&format=json&no_redirect=1&no_html=1&skip_disambig=1'
         self.frame = '\x02%s\x02\x03# :\x03 %s'

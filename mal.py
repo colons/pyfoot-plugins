@@ -6,9 +6,9 @@ from os import path
 import pickle
 import re
 
-import module
+import plugin
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     """ Fresh MyAnimeList facts, milled from <a href="http://mal-api.com">mal-api.com</a>. """
     def register_commands(self):
         self.commands = [

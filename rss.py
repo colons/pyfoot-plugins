@@ -1,13 +1,13 @@
 from time import sleep
 import feedparser
 
-import module
+import plugin
 
 defaults = {
         'rss_feeds': {},
         }
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     """<pyfoot> is capable of reading an RSS feed into a channel, but it's not configurable live. Talk to whoever is operating your local pyfoot instance if you have a feed you'd like in a channel."""
     def prepare(self):
         self.latestitem = {}

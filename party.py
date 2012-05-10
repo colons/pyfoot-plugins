@@ -3,7 +3,7 @@ import time
 from os import path,mkdir
 
 from translate import Translator
-import module 
+import plugin 
 
 defaults = {
         'party_via': 'ja',
@@ -18,7 +18,7 @@ def dupes(party):
     else:
         return False
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def prepare(self):
         self.translator = Translator(self.conf.get('bing_app_id'))
 

@@ -2,9 +2,9 @@ from os import path
 from random import choice
 import re
 
-import module
+import plugin
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
                 ('hhg <character>', self.quote),

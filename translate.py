@@ -1,7 +1,7 @@
 #from BeautifulSoup import BeautifulStoneSoup
 import urllib
 
-import module
+import plugin
 
 class Translator(object):
     def __init__(self, bing_app_id):
@@ -20,7 +20,7 @@ class Translator(object):
         return result[4:-1]
 
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def prepare(self):
         self.translator = Translator(self.conf.get('bing_app_id'))
 

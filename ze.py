@@ -1,9 +1,9 @@
 import urllib2
-import module
+import plugin
 from random import choice
 import re
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
                 ('ze', self.ze),

@@ -1,6 +1,6 @@
-import module
+import plugin
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
                 ('reencode <from> <to> <<phrase>>', self.reencode),

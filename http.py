@@ -8,7 +8,7 @@ import re
 from random import choice
 import urllib
 from BaseHTTPServer import BaseHTTPRequestHandler
-import module
+import plugin
 
 defaults = {
         'http_url_blacklist': [],
@@ -48,7 +48,7 @@ def prettify_url(url):
     return url.hostname + re.sub('/$', '', url.path)
 
 
-class Module(module.Module):
+class Plugin(plugin.Plugin):
     def register_commands(self):
         self.regexes = [
                 ('.*\\bhttps?://.*', self.title)
