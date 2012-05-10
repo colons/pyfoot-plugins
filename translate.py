@@ -14,6 +14,9 @@ class Translator(object):
         result = page.read()
         if result[4:-1].startswith('ArgumentOutOfRangeException: '):
             raise NameError("that's not a language, silly")
+
+        print ' -- %s' % result[4:-1]
+
         return result[4:-1]
 
 
