@@ -5,6 +5,12 @@ from os import path,mkdir
 from translate import Translator
 import module 
 
+defaults = {
+        'party_via': 'ja',
+        'party_dir': '~/.pyfoot/party/'
+        }
+
+
 def dupes(party):
     """ Returns True if any phrase appears twice in our party """
     if ''.join(party[-1:]) in party[:-1]:

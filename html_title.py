@@ -7,7 +7,12 @@ from random import choice
 
 import module
 
+defaults = {
+        'http_url_blacklist': [],
+        }
+
 class Module(module.Module):
+
     def prepare(self):
         self.user_agents = [
                 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11',
@@ -32,7 +37,7 @@ class Module(module.Module):
             if word.startswith('http://') or word.startswith('https://'):
                 permitted = True
 
-                for i in self.conf.get('url_blacklist'):
+                for i in self.conf.get('http_url_blacklist'):
                     channel, blacklist = i.split(' ')
 
                     if channel == message.source and re.match(blacklist, word):

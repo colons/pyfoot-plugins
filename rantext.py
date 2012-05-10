@@ -4,6 +4,10 @@ from copy import copy
 import module
 
 
+defaults = {
+        'rantext_sources': [],
+        }
+
 class Module(module.Module):
     """ Retrieve a random line from a text file. Can be directed at individuals. """
     def register_commands(self):
