@@ -14,13 +14,12 @@ class Plugin(plugin.Plugin):
         self.commands = [
                 ('mal search <<query>>', self.search),
                 ('mal set <user>', self.define),
+                ('mal <user>', self.summarise),
+                ('mal', self.summarise_self),
                 ('mal fight <user1> <user2>', self.fight),
                 ('mal fight <user>', self.fight_self),
                 ('mal compare <user1> <user2>', self.compare),
                 ('mal compare <user>', self.compare_self),
-                ('mal info <user>', self.summarise),
-                ('mal info', self.summarise_self),
-                ('mal', self.summarise_self),
             ]
 
     def prepare(self):
@@ -105,6 +104,9 @@ class Plugin(plugin.Plugin):
         self.summarise(message, args)
 
     def summarise(self, message, args):
+        """ Summarise a particular user (or yourself).
+        $<comchar>mal theshillito
+        >http://myanimelist.net/animelist/\x02theshillito\x02\x03# |\x03 \x0262.17\x02 days across \x02281\x02 shows\x03# |\x03 K-On!: Ura-On!\x03# :\x03 \x027\x02/\x027\x02\x03# :\x03 \x027\x02\x03# |\x03 Ah! My Goddess\x03# :\x03 \x0224\x02/\x0224\x02\x03# :\x03 \x0210\x02\x03# |\x03 Kamen no Maid Guy\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x029\x02\x03# |\x03 Makai Senki Disgaea\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x027\x02\x03# |\x03 K-On!\x03# :\x03 \x0213\x02/\x0213\x02\x03# :\x03 \x029\x02"""
         user = self.maluser(args['user'])
 
         try:
