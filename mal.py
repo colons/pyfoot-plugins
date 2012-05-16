@@ -25,9 +25,9 @@ class Plugin(plugin.Plugin):
     def prepare(self):
         self.url = 'http://mal-api.com/%s?%s'
         self.default_args = ['format=json']
-        self.user_file_path = path.expanduser(self.conf.get('content_dir')+'mal')
+        self.user_file_path = path.expanduser(self.conf.conf['content_dir']+'mal')
         self.malusers = {}
-        self.help_setup = "link a MyAnimeList account to your IRC nick with '"+self.conf.get('comchar')+"mal set <account name>'"
+        self.help_setup = "link a MyAnimeList account to your IRC nick with '"+self.conf.conf['comchar']+"mal set <account name>'"
         self.help_missing = 'no such MAL user \x02%s\x02'
         
         try:
@@ -55,7 +55,7 @@ class Plugin(plugin.Plugin):
             except:
                 print ' :: error reading MAL user pickle, creating one now'
 
-            malusers[self.conf.get('network_address')+' '+message.nick.lower()] = user 
+            malusers[self.conf.conf['network_address']+' '+message.nick.lower()] = user 
             userfile = open(self.user_file_path, 'w')
             pickle.dump(malusers, userfile)
             userfile.close()
@@ -69,7 +69,7 @@ class Plugin(plugin.Plugin):
         userfile.close()
 
         try:
-            maluser = malusers[self.conf.get('network_address')+' '+user.lower()]
+            maluser = malusers[self.conf.conf['network_address']+' '+user.lower()]
         except KeyError:
             return user
         else:

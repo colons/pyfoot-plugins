@@ -64,7 +64,7 @@ class Plugin(plugin.Plugin):
             if word.startswith('http://') or word.startswith('https://'):
                 permitted = True
 
-                for i in self.conf.get('http_url_blacklist'):
+                for i in self.conf.conf['http_url_blacklist']:
                     channel, blacklist = i.split(' ')
 
                     if channel == message.source and re.match(blacklist, word):

@@ -15,8 +15,8 @@ class Plugin(plugin.Plugin):
 
         self.sources = {}
 
-        for source in self.conf.get('rantext_sources'):
-            filename = self.conf.get('content_dir')+source+'.txt'
+        for source in self.conf.conf['rantext_sources']:
+            filename = self.conf.conf['content_dir']+source+'.txt'
             file = open(filename)
             line_list = []
             for line in file:

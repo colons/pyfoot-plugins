@@ -21,7 +21,7 @@ class Plugin(plugin.Plugin):
         >Shocking cock-up. The mice were furious."""
         character = args['character']
         
-        hhg = open(path.expanduser(self.conf.get('content_dir')+'hhg.txt'))
+        hhg = open(path.expanduser(self.conf.conf['content_dir']+'hhg.txt'))
         linelist = []
 
         character = character.strip()
