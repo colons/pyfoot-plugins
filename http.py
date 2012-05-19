@@ -141,7 +141,7 @@ class Plugin(plugin.Plugin):
                             if redirection_url.netloc == '':
                                 word = ''.join([url_parsed.scheme,'://',url_hostname,redirection_url.path])
                             elif redirection_url.netloc != url_hostname:
-                                url_hostname = '%s \x034->\x03 %s' % (url_hostname, prettify_url(word))
+                                url_hostname = '%s \x03#->\x03 %s' % (url_hostname, prettify_url(word))
                             word = ajax_url(word)
 
                         resource_type = resource.headers['Content-Type'].split(';')[0]
@@ -176,9 +176,9 @@ class Plugin(plugin.Plugin):
                             data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
                         except TypeError:
                             data_length = 'Unknown size'
-                        title = '%s \x034|\x03 %s' % (resource_type, data_length)
+                        title = '%s \x03#|\x03 %s' % (resource_type, data_length)
                     end_time = time.time()
 
                     time_length = 'Found in %s sec.' % round(end_time-start_time, 2)
-                    summary = '%s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, time_length, url_hostname)
+                    summary = '%s \x03#|\x03 %s \x03#|\x03 \x02%s\x02' % (title, time_length, url_hostname)
                     self.irc.privmsg(message.source, summary)
