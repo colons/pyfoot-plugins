@@ -139,8 +139,8 @@ class Plugin(plugin.Plugin):
                             word = resource.history[-1].headers['Location']
                             redirection_url = urlparse.urlparse(word)
                             if redirection_url.netloc == '':
-                                word = ''.join([url_parsed.scheme,'://',url_hostname,redirection_url.path])
-                            elif redirection_url.netloc != url_hostname:
+                                word = ''.join((url_parsed.scheme, '://', url_parsed.netloc, redirection_url.path))
+                            elif redirection_url.hostname != url_hostname:
                                 url_hostname = '%s \x03#->\x03 %s' % (url_hostname, prettify_url(word))
                             word = ajax_url(word)
 
