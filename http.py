@@ -111,7 +111,6 @@ class Plugin(plugin.Plugin):
         for word in message.content.split():
             if self.regex.match(word):
                 permitted = True
-                start_time = time.time()
 
                 for i in self.conf.conf['http_url_blacklist']:
                     channel, blacklist = i.split(' ')
@@ -120,6 +119,8 @@ class Plugin(plugin.Plugin):
                         permitted = False
 
                 if permitted:
+                    """ Set it up. """
+                    start_time = time.time()
                     url_parsed = urlparse.urlparse(word)
                     url_hostname = url_parsed.hostname
                     word = self.irc.strip_formatting(ajax_url(word))
@@ -162,7 +163,7 @@ class Plugin(plugin.Plugin):
                             if title == '':
                                 raise NoTitleError
                             else:
-                                title = unescape(title).replace('\n','').strip() + u' \x034|\x03 '
+                                title = unescape(title).replace('\n','').strip()
                         else:
                             """TODO: Make this feature togglable, since it can seem spammy for image dumps."""
                             raise NoTitleError
@@ -171,12 +172,13 @@ class Plugin(plugin.Plugin):
                     except requests.exceptions.HTTPError, httpe:
                         title = '%s %s' % (httpe.response.status_code, responses[httpe.response.status_code][0])
                     except NoTitleError:
-                        title = ''
+                        try:
+                            data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
+                        except TypeError:
+                            data_length = 'Unknown size'
+                        title = '%s \x034|\x03 %s' % (resource_type, data_length)
                     end_time = time.time()
+
                     time_length = 'Found in %s sec.' % round(end_time-start_time, 2)
-                    try:
-                        data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
-                    except TypeError:
-                        data_length = u'Unknown size'
-                    summary = '%s%s \x034|\x03 %s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, resource_type, data_length, time_length, url_hostname)
+                    summary = '%s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, time_length, url_hostname)
                     self.irc.privmsg(message.source, summary)
