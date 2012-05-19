@@ -174,5 +174,9 @@ class Plugin(plugin.Plugin):
                         title = ''
                     end_time = time.time()
                     time_length = 'Found in %s sec.' % round(end_time-start_time, 2)
-                    summary = '%sType: %s \x034|\x03 Size: %s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, resource_type, filesize.size(float(resource.headers['Content-Length']), filesizes), time_length, url_hostname)
+                    try:
+                        data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
+                    except TypeError:
+                        data_length = u'Unknown size'
+                    summary = '%s%s \x034|\x03 %s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, resource_type, data_length, time_length, url_hostname)
                     self.irc.privmsg(message.source, summary)
