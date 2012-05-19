@@ -42,7 +42,7 @@ def ajax_url(url):
     if hashbang_index != -1:
         base = url[:hashbang_index]
         joiner = '?' if '?' not in base else '&'
-        url = ''.join([base,joiner,'_escaped_fragment_=',urllib.quote(url[hashbang_index+2:], '=')])
+        url = ''.join((base, joiner, '_escaped_fragment_=', urllib.quote(url[hashbang_index+2:], '=')))
     return url
 
 def prettify_url(url):
