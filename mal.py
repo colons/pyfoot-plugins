@@ -14,21 +14,20 @@ class Plugin(plugin.Plugin):
         self.commands = [
                 ('mal search <<query>>', self.search),
                 ('mal set <user>', self.define),
+                ('mal <user>', self.summarise),
+                ('mal', self.summarise_self),
                 ('mal fight <user1> <user2>', self.fight),
                 ('mal fight <user>', self.fight_self),
                 ('mal compare <user1> <user2>', self.compare),
                 ('mal compare <user>', self.compare_self),
-                ('mal info <user>', self.summarise),
-                ('mal info', self.summarise_self),
-                ('mal', self.summarise_self),
             ]
 
     def prepare(self):
         self.url = 'http://mal-api.com/%s?%s'
         self.default_args = ['format=json']
-        self.user_file_path = path.expanduser(self.conf.get('content_dir')+'mal')
+        self.user_file_path = path.expanduser(self.conf.conf['content_dir']+'mal')
         self.malusers = {}
-        self.help_setup = "link a MyAnimeList account to your IRC nick with '"+self.conf.get('comchar')+"mal set <account name>'"
+        self.help_setup = "link a MyAnimeList account to your IRC nick with '"+self.conf.conf['comchar']+"mal set <account name>'"
         self.help_missing = 'no such MAL user \x02%s\x02'
         
         try:
@@ -56,7 +55,7 @@ class Plugin(plugin.Plugin):
             except:
                 print ' :: error reading MAL user pickle, creating one now'
 
-            malusers[self.conf.get('network_address')+' '+message.nick.lower()] = user 
+            malusers[self.conf.conf['network_address']+' '+message.nick.lower()] = user 
             userfile = open(self.user_file_path, 'w')
             pickle.dump(malusers, userfile)
             userfile.close()
@@ -70,7 +69,7 @@ class Plugin(plugin.Plugin):
         userfile.close()
 
         try:
-            maluser = malusers[self.conf.get('network_address')+' '+user.lower()]
+            maluser = malusers[self.conf.conf['network_address']+' '+user.lower()]
         except KeyError:
             return user
         else:
@@ -105,6 +104,9 @@ class Plugin(plugin.Plugin):
         self.summarise(message, args)
 
     def summarise(self, message, args):
+        """ Summarise a particular user (or yourself).
+        $<comchar>mal theshillito
+        >http://myanimelist.net/animelist/\x02theshillito\x02\x03# |\x03 \x0262.17\x02 days across \x02281\x02 shows\x03# |\x03 K-On!: Ura-On!\x03# :\x03 \x027\x02/\x027\x02\x03# :\x03 \x027\x02\x03# |\x03 Ah! My Goddess\x03# :\x03 \x0224\x02/\x0224\x02\x03# :\x03 \x0210\x02\x03# |\x03 Kamen no Maid Guy\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x029\x02\x03# |\x03 Makai Senki Disgaea\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x027\x02\x03# |\x03 K-On!\x03# :\x03 \x0213\x02/\x0213\x02\x03# :\x03 \x029\x02"""
         user = self.maluser(args['user'])
 
         try:

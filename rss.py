@@ -12,9 +12,9 @@ class Plugin(plugin.Plugin):
     def prepare(self):
         self.latestitem = {}
 
-        for channel in self.conf.get('rss_feeds'):
+        for channel in self.conf.conf['rss_feeds']:
             # get latest item, remember to ignore it
-            url = self.conf.get('rss_feeds')[channel]
+            url = self.conf.conf['rss_feeds'][channel]
 
             try:
                 feed = feedparser.parse(url)
@@ -26,8 +26,8 @@ class Plugin(plugin.Plugin):
         while True:
             sleep(150)
 
-            for channel in self.conf.get('rss_feeds'):
-                url = self.conf.get('rss_feeds')[channel]
+            for channel in self.conf.conf['rss_feeds']:
+                url = self.conf.conf['rss_feeds'][channel]
 
                 try:
                     feed = feedparser.parse(url)

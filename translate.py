@@ -22,7 +22,7 @@ class Translator(object):
 
 class Plugin(plugin.Plugin):
     def prepare(self):
-        self.translator = Translator(self.conf.get('bing_app_id'))
+        self.translator = Translator(self.conf.conf['bing_app_id'])
 
     def register_commands(self):
         self.commands = [

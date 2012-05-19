@@ -20,7 +20,7 @@ def dupes(party):
 
 class Plugin(plugin.Plugin):
     def prepare(self):
-        self.translator = Translator(self.conf.get('bing_app_id'))
+        self.translator = Translator(self.conf.conf['bing_app_id'])
 
     def register_commands(self):
         self.commands = [
@@ -31,7 +31,7 @@ class Plugin(plugin.Plugin):
         """ A recreation of <a href="http://translationparty.com/">Translation Party</a> using the Bing translate API.
         $<comchar>party scissor me timbers
         >I have a tree.\x03# |\x03 \x027\x02 attempts\x03# |\x03 http://woof.bldm.us/party/<network>/Derasonika-120213-235608 """
-        transvia = self.conf.get('party_via')
+        transvia = self.conf.conf['party_via']
     
 
         party = [args['phrase']]
@@ -40,7 +40,7 @@ class Plugin(plugin.Plugin):
             party.append(self.translator.translate(transvia, 'en', party[-1]))
         
         filename = '%s-%s' % (message.nick, time.strftime('%y%m%d-%H%M%S'))
-        filepath = path.expanduser(self.conf.get('party_dir')+self.conf.alias+'/')
+        filepath = path.expanduser(self.conf.conf['party_dir']+self.conf.alias+'/')
         if not path.exists(filepath):
             mkdir(filepath)
         elif path.exists(filepath) and not path.isdir(filepath):
@@ -54,4 +54,4 @@ class Plugin(plugin.Plugin):
         file.close()
         
         attempts = (len(party)-1)/2
-        self.irc.privmsg(message.source, '%s | \x02%i\x02 attempts | %sparty/%s/%s/' % (party[-1], attempts, self.conf.get('web_url'), self.conf.alias, filename), pretty=True)
+        self.irc.privmsg(message.source, '%s | \x02%i\x02 attempts | %sparty/%s/%s/' % (party[-1], attempts, self.conf.conf['web_url'], self.conf.alias, filename), pretty=True)
