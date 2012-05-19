@@ -163,7 +163,7 @@ class Plugin(plugin.Plugin):
                             if title == '':
                                 raise NoTitleError
                             else:
-                                title = unescape(title).replace('\n','').strip()
+                                title = re.sub('\s+', ' ', unescape(title).strip(), re.DOTALL)
                         else:
                             """TODO: Make this feature togglable, since it can seem spammy for image dumps."""
                             raise NoTitleError
