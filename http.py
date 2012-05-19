@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-import lxml.html
+#import lxml.html
 #import lxml.etree
 import requests
-from urlparse import urlparse
+import urlparse
 import re
-
 from random import choice
 import urllib
 from BaseHTTPServer import BaseHTTPRequestHandler
+import chardet
+import htmlentitydefs
+from hurry import filesize
+
+import time
+
 import plugin
 
 defaults = {
@@ -47,11 +52,54 @@ def prettify_url(url):
         url = urlparse.urlparse(url)
     return url.hostname + re.sub('/$', '', url.path)
 
+class NoTitleError(Exception):
+    def __init__(self):
+        pass
+
+""" Thanks to Fredrik Lundh: http://effbot.org/zone/re-sub.htm#unescape-html """
+##
+# Removes HTML or XML character references and entities from a text string.
+#
+# @param text The HTML (or XML) source text.
+# @return The plain text, as a Unicode string, if necessary.
+def unescape(text):
+    def fixup(m):
+        text = m.group(0)
+        if text[:2] == "&#":
+            # character reference
+            try:
+                if text[:3] == "&#x":
+                    return unichr(int(text[3:-1], 16))
+                else:
+                    return unichr(int(text[2:-1]))
+            except ValueError:
+                pass
+        else:
+            # named entity
+            try:
+                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+            except KeyError:
+                pass
+        return text # leave as is
+    return re.sub("&#?\w+;", fixup, text)
+
+filesizes = [
+    (1024 ** 5, ' PiB'),
+    (1024 ** 4, ' TiB'),
+    (1024 ** 3, ' GiB'),
+    (1024 ** 2, ' MiB'),
+    (1024 ** 1, ' KiB'),
+    (1024 ** 0, ' B'),
+    ]
 
 class Plugin(plugin.Plugin):
+    def prepare(self):
+        self.regex_str = '.*\\bhttps?://.?.*'
+        self.regex = re.compile(self.regex_str)
+
     def register_commands(self):
         self.regexes = [
-                ('.*\\bhttps?://.*', self.title)
+                (self.regex_str, self.title)
                 ]
 
     def title(self, message, args):
@@ -61,28 +109,34 @@ class Plugin(plugin.Plugin):
         """
 
         for word in message.content.split():
-            if word.startswith('http://') or word.startswith('https://'):
+            if self.regex.match(word):
                 permitted = True
+                start_time = time.time()
 
-                for i in self.conf.get('http_url_blacklist'):
+                for i in self.conf.conf['http_url_blacklist']:
                     channel, blacklist = i.split(' ')
 
                     if channel == message.source and re.match(blacklist, word):
                         permitted = False
 
                 if permitted:
-                    url_parsed = urlparse(word)
+                    url_parsed = urlparse.urlparse(word)
                     url_hostname = url_parsed.hostname
                     word = self.irc.strip_formatting(ajax_url(word))
-                    request_headers = {'User-Agent': choose_agent()}
+                    agent = choose_agent()
+                    request_headers = {'User-Agent': agent}
+                    request_headers_405 = {'User-Agent': agent, 'Range': 'bytes=1-5'}
 
                     try:
                         resource = requests.head(word, headers=request_headers, allow_redirects=True)
-                        resource.raise_for_status()
+                        if resource.status_code == 405:
+                            resource = requests.get(word, headers=request_headers_405, allow_redirects=True)
+                        else:
+                            resource.raise_for_status()
 
                         if resource.history != [] and resource.history[-1].status_code in redirect_codes:
                             word = resource.history[-1].headers['Location']
-                            redirection_url = urlparse(word)
+                            redirection_url = urlparse.urlparse(word)
                             if redirection_url.netloc == '':
                                 word = ''.join([url_parsed.scheme,'://',url_hostname,redirection_url.path])
                             elif redirection_url.netloc != url_hostname:
@@ -93,6 +147,8 @@ class Plugin(plugin.Plugin):
                         if resource_type in html_types:
                             resource = requests.get(word, headers=request_headers)
                             resource.raise_for_status()
+                            if resource.encoding == 'ISO-8859-1':
+                                resource.encoding = chardet.detect(resource.content)['encoding']
                             """Seems that most pages claiming to be XHTML—including many large websites—
                             are not strict enough to parse correctly, usually for some very minor reason,
                             and it's a waste to attempt to parse it as XML first. This code will remain
@@ -101,13 +157,22 @@ class Plugin(plugin.Plugin):
                             #    title = lxml.etree.fromstring(resource.text).find('.//xhtml:title', namespaces={'xhtml':'http://www.w3.org/1999/xhtml'}).text.strip()
                             #else:  # text/html
 
-                            title = lxml.html.fromstring(resource.text).find(".//title").text.replace('\n','').strip()
+                            #title = lxml.html.fromstring(resource.text).find(".//title").text.replace('\n','').strip()
+                            title = re.findall('(?i)(?<=<title>).*(?=</title>)', resource.text, re.DOTALL)[0]
+                            if title == '':
+                                raise NoTitleError
+                            else:
+                                title = unescape(title).replace('\n','').strip() + u' \x034|\x03 '
                         else:
                             """TODO: Make this feature togglable, since it can seem spammy for image dumps."""
-                            title = 'Type: %s, Size: %s bytes' % (resource_type, resource.headers['Content-Length'])
+                            raise NoTitleError
                     except requests.exceptions.ConnectionError:
                         title = 'Error connecting to server'
                     except requests.exceptions.HTTPError, httpe:
                         title = '%s %s' % (httpe.response.status_code, responses[httpe.response.status_code][0])
-                    summary = '%s \x034|\x03 \x02%s\x02' % (title, url_hostname)
+                    except NoTitleError:
+                        title = ''
+                    end_time = time.time()
+                    time_length = 'Found in %s sec.' % round(end_time-start_time, 2)
+                    summary = '%sType: %s \x034|\x03 Size: %s \x034|\x03 %s \x034|\x03 \x02%s\x02' % (title, resource_type, filesize.size(float(resource.headers['Content-Length']), filesizes), time_length, url_hostname)
                     self.irc.privmsg(message.source, summary)
