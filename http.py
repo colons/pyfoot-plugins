@@ -95,7 +95,7 @@ filesizes = [
 class Plugin(plugin.Plugin):
     def register_commands(self):
         self.regexes = [
-                ('(?i).*https?://.?', self.title)
+                ('(?i).*https?://.', self.title)
                 ]
 
     def title(self, message, args):
