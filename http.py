@@ -93,13 +93,9 @@ filesizes = [
     ]
 
 class Plugin(plugin.Plugin):
-    def prepare(self):
-        self.regex_str = '.*\\bhttps?://.?.*'
-        self.regex = re.compile(self.regex_str)
-
     def register_commands(self):
         self.regexes = [
-                (self.regex_str, self.title)
+                ('(?i).*https?://.?', self.title)
                 ]
 
     def title(self, message, args):
@@ -107,78 +103,77 @@ class Plugin(plugin.Plugin):
         $https://twitter.com/#!/camh/statuses/147449116551680001
         >Twitter / Cameron Kenley Hunt: There are only three hard  ... \x03#|\x03 \x02twitter.com\x02
         """
+        for word in re.findall('(?iu)https?://.*?(?=\\s|\\Z)', message.content.decode('utf-8')):
+            permitted = True
 
-        for word in message.content.split():
-            if self.regex.match(word):
-                permitted = True
+            for i in self.conf.conf['http_url_blacklist']:
+                channel, blacklist = i.split(' ')
 
-                for i in self.conf.conf['http_url_blacklist']:
-                    channel, blacklist = i.split(' ')
+                if channel == message.source and re.match(blacklist, word):
+                    permitted = False
 
-                    if channel == message.source and re.match(blacklist, word):
-                        permitted = False
+            if permitted:
+                """ Set it up. """
+                url_parsed = urlparse.urlparse(word)
+                url_hostname = url_parsed.hostname
+                word = ajax_url(self.irc.strip_formatting(word))
+                agent = choose_agent()
+                request_headers = {'User-Agent': agent}
+                request_headers_405 = {'User-Agent': agent, 'Range': 'bytes=1-5'}
 
-                if permitted:
-                    """ Set it up. """
-                    start_time = time.time()
-                    url_parsed = urlparse.urlparse(word)
-                    url_hostname = url_parsed.hostname
-                    word = self.irc.strip_formatting(ajax_url(word))
-                    agent = choose_agent()
-                    request_headers = {'User-Agent': agent}
-                    request_headers_405 = {'User-Agent': agent, 'Range': 'bytes=1-5'}
+                """ GO! """
+                start_time = time.time()
+                try:
+                    resource = requests.head(word, headers=request_headers, allow_redirects=True)
+                    if resource.status_code == 405:
+                        resource = requests.get(word, headers=request_headers_405, allow_redirects=True)
+                    else:
+                        resource.raise_for_status()
 
-                    try:
-                        resource = requests.head(word, headers=request_headers, allow_redirects=True)
-                        if resource.status_code == 405:
-                            resource = requests.get(word, headers=request_headers_405, allow_redirects=True)
-                        else:
-                            resource.raise_for_status()
+                    if resource.history != [] and resource.history[-1].status_code in redirect_codes:
+                        word = resource.history[-1].headers['Location']
+                        redirection_url = urlparse.urlparse(word)
+                        if redirection_url.netloc == '':
+                            word = ''.join((url_parsed.scheme, '://', url_parsed.netloc, redirection_url.path))
+                        elif redirection_url.hostname != url_hostname:
+                            url_hostname = '%s \x03#->\x03 %s' % (url_hostname, prettify_url(word))
+                        word = ajax_url(word)
 
-                        if resource.history != [] and resource.history[-1].status_code in redirect_codes:
-                            word = resource.history[-1].headers['Location']
-                            redirection_url = urlparse.urlparse(word)
-                            if redirection_url.netloc == '':
-                                word = ''.join((url_parsed.scheme, '://', url_parsed.netloc, redirection_url.path))
-                            elif redirection_url.hostname != url_hostname:
-                                url_hostname = '%s \x03#->\x03 %s' % (url_hostname, prettify_url(word))
-                            word = ajax_url(word)
+                    resource_type = resource.headers['Content-Type'].split(';')[0]
+                    if resource_type in html_types:
+                        resource = requests.get(word, headers=request_headers)
+                        resource.raise_for_status()
+                        if resource.encoding == 'ISO-8859-1':
+                            resource.encoding = chardet.detect(resource.content)['encoding']
+                        """Seems that most pages claiming to be XHTML—including many large websites—
+                        are not strict enough to parse correctly, usually for some very minor reason,
+                        and it's a waste to attempt to parse it as XML first. This code will remain
+                        for the day we can reliably parse XHTML as XML for the majority of sites."""
+                        #if (html_types[1] in resource_type) or (('xhtml' or 'xml') in resource.text.split('>')[0].lower()):  # application/xhtml+xml
+                        #    title = lxml.etree.fromstring(resource.text).find('.//xhtml:title', namespaces={'xhtml':'http://www.w3.org/1999/xhtml'}).text.strip()
+                        #else:  # text/html
 
-                        resource_type = resource.headers['Content-Type'].split(';')[0]
-                        if resource_type in html_types:
-                            resource = requests.get(word, headers=request_headers)
-                            resource.raise_for_status()
-                            if resource.encoding == 'ISO-8859-1':
-                                resource.encoding = chardet.detect(resource.content)['encoding']
-                            """Seems that most pages claiming to be XHTML—including many large websites—
-                            are not strict enough to parse correctly, usually for some very minor reason,
-                            and it's a waste to attempt to parse it as XML first. This code will remain
-                            for the day we can reliably parse XHTML as XML for the majority of sites."""
-                            #if (html_types[1] in resource_type) or (('xhtml' or 'xml') in resource.text.split('>')[0].lower()):  # application/xhtml+xml
-                            #    title = lxml.etree.fromstring(resource.text).find('.//xhtml:title', namespaces={'xhtml':'http://www.w3.org/1999/xhtml'}).text.strip()
-                            #else:  # text/html
-
-                            #title = lxml.html.fromstring(resource.text).find(".//title").text.replace('\n','').strip()
-                            title = re.findall('(?i)(?<=<title>).*(?=</title>)', resource.text, re.DOTALL)[0]
-                            if title == '':
-                                raise NoTitleError
-                            else:
-                                title = re.sub('\s+', ' ', unescape(title).strip(), re.DOTALL)
-                        else:
-                            """TODO: Make this feature togglable, since it can seem spammy for image dumps."""
+                        #title = lxml.html.fromstring(resource.text).find(".//title").text.replace('\n','').strip()
+                        title = re.findall('(?si)(?<=<title>).*(?=</title>)', resource.text)[0]
+                        if title == '':
                             raise NoTitleError
-                    except requests.exceptions.ConnectionError:
-                        title = 'Error connecting to server'
-                    except requests.exceptions.HTTPError, httpe:
-                        title = '%s %s' % (httpe.response.status_code, responses[httpe.response.status_code][0])
-                    except NoTitleError:
-                        try:
-                            data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
-                        except TypeError:
-                            data_length = 'Unknown size'
-                        title = '%s \x03#|\x03 %s' % (resource_type, data_length)
-                    end_time = time.time()
+                        else:
+                            title = re.sub('(?s)\s+', ' ', unescape(title).strip())
+                    else:
+                        """TODO: Make this feature togglable, since it can seem spammy for image dumps."""
+                        raise NoTitleError
+                except requests.exceptions.ConnectionError:
+                    title = 'server connection error'
+                except requests.exceptions.HTTPError, httpe:
+                    title = '%s %s' % (httpe.response.status_code, responses[httpe.response.status_code][0])
+                except NoTitleError:
+                    try:
+                        data_length = filesize.size(float(resource.headers['Content-Length']), filesizes)
+                    except TypeError:
+                        data_length = 'size unknown'
+                    title = '%s \x03#|\x03 %s' % (resource_type, data_length)
+                end_time = time.time()
 
-                    time_length = 'Found in %s sec.' % round(end_time-start_time, 2)
-                    summary = '%s \x03#|\x03 %s \x03#|\x03 \x02%s\x02' % (title, time_length, url_hostname)
-                    self.irc.privmsg(message.source, summary)
+                time_length = '%s seconds' % round(end_time-start_time, 2)
+                summary = '%s \x03#|\x03 %s \x03#|\x03 \x02%s\x02' % (title, time_length, url_hostname)
+                self.irc.privmsg(message.source, summary)
