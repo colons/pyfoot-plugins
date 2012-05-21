@@ -15,7 +15,7 @@ class Plugin(plugin.Plugin):
         <city> can be a name or a postal code.
         Usage: cw <city> """
         
-        url = self.url + urlencode({"weather":args['city']}),)
+        url = self.url + urlencode({"weather":args['city']})
         data = urllib2.urlopen(url)
         dom = minidom.parse(data)
 
@@ -34,7 +34,7 @@ class Plugin(plugin.Plugin):
         <city> can be a name or postal code
         Usage: wf <city>"""
         
-        url = self.url + urlencode({"weather": args['city']}), )
+        url = self.url + urlencode({"weather": args['city']})
         data = urllib2.urlopen(url)
         dom = minidom.parse(data)
 
