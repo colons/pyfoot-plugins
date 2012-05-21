@@ -39,7 +39,7 @@ class Plugin(plugin.Plugin):
         dom = minidom.parse(data)
 
         msg = u"Forecast for: "
-        msg = msg += dom.getElementsByTagName("city")[0].getAttribute("data")
+        msg += dom.getElementsByTagName("city")[0].getAttribute("data")
 
         conditions = dom.getElementsByTagName("forecast_conditions")
         conditions_str = "[%s- High: %sF | Low: %sF | Outlook: %s]"
