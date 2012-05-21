@@ -5,15 +5,15 @@ from xml.dom import minidom
 
 class Plugin(plugin.Plugin):
     def register_commands(self):
-        self.commands = [('cw <city>', self.current),
-                         ('wf <city>', self.forecast)]
+        self.commands = [('weather current <<location>>', self.current),
+                         ('weather forecast <<location>>', self.forecast)]
     def prepare(self):
         self.url = "http://www.google.com/ig/api?"
         
     def current(self, message, args):
-        """ Fetches the current weather in <city>
-        <city> can be a name or a postal code.
-        Usage: cw <city> """
+        """ Fetches the current weather by location
+        location can be a name or a postal code.
+        Usage ex: !weather current London, England"""
         
         url = self.url + urlencode({"weather":args['city']})
         data = urllib2.urlopen(url)
@@ -30,9 +30,9 @@ class Plugin(plugin.Plugin):
         self.irc.privmsg(message.source, msg)
 
     def forecast(self, message, args):
-        """ Fetches the weather forecast for <city>
-        <city> can be a name or postal code
-        Usage: wf <city>"""
+        """ Fetches the weather forecast for location
+        location can be a name or postal code
+        Usage ex: !weather forecast London, England"""
         
         url = self.url + urlencode({"weather": args['city']})
         data = urllib2.urlopen(url)
