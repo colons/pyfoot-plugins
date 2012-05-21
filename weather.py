@@ -52,6 +52,6 @@ class Plugin(plugin.Plugin):
             high_f = elements.getElementsByTagName("high")[0].getAttribute("data")
             low_f = elements.getElementsByTagName("low")[0].getAttribute("data")
             condition = elements.getElementsByTagName("condition")[0].getAttribute("data")
-            msg += conditions_str % (day, high_f, low_f, condition)
+            msg += conditions_str % (day.lower(), high_f, low_f, condition.lower())
 
         self.irc.privmsg(message.source, msg)
