@@ -30,7 +30,7 @@ class Plugin(plugin.Plugin):
         self.irc.privmsg(message.source, msg)
 
     def forecast(self, message, args):
-        """ Fetches the weather forcast for <city>
+        """ Fetches the weather forecast for <city>
         <city> can be a name or postal code
         Usage: wf <city>"""
         
