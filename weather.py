@@ -11,6 +11,10 @@ class Plugin(plugin.Plugin):
         self.url = "http://www.google.com/ig/api?"
         
     def current(self, message, args):
+        """ Fetches the current weather in <city>
+        <city> can be a name or a postal code.
+        Usage: cw <city> """
+        
         url = self.url+'%s' % (urlencode({"weather":args['city']}),)
         data = urllib2.urlopen(url)
         dom = minidom.parse(data)
@@ -26,6 +30,10 @@ class Plugin(plugin.Plugin):
         self.irc.privmsg(message.source, msg)
 
     def forecast(self, message, args):
+        """ Fetches the weather forcast for <city>
+        <city> can be a name or postal code
+        Usage: wf <city>"""
+        
         url = self.url+'%s' % (urlencode({"weather": args['city']}), )
         data = urllib2.urlopen(url)
         dom = minidom.parse(data)
