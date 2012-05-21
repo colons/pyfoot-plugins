@@ -5,8 +5,8 @@ from xml.dom import minidom
 
 class Plugin(plugin.Plugin):
     def register_commands(self):
-        self.commands = [('cw <city>', self.current),
-                         ('wf <city>', self.forecast)]
+        self.commands = [('weather current <city>', self.current),
+                         ('weather forecast <city>', self.forecast)]
     def prepare(self):
         self.url = "http://www.google.com/ig/api?"
         
