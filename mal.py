@@ -269,18 +269,22 @@ class Plugin(plugin.Plugin):
 
         # data = self.query('anime/%i' % search[0]['id'])
         try:
-            data = search[0]
+            keion = search[0]
         except IndexError:
             self.irc.privmsg(message.source,
                     'no results | http://myanimelist.net/anime.php?q=%s' % urllib2.quote(query),
                     pretty=True)
             return
+
+        for show in search:
+            if show['title'].lower() == args['query'].lower():
+                keion = show
         
-        showpage = 'http://myanimelist.net/anime/%i' % search[0]['id']
+        keion_page = 'http://myanimelist.net/anime/%i' % show['id']
         
         # the html stripping should not be here, but it is for now because fuck you
         self.irc.privmsg(message.source,
-                '\x02%s\x02 : %s | %s | %s' % (data['title'], data['type'], showpage, re.sub('<[^<]+?>', '', data['synopsis'])),
+                '\x02%s\x02 : %s | %s | %s' % (keion['title'], keion['type'], keion_page, re.sub('<[^<]+?>', '', keion['synopsis'])),
                 pretty=True, crop=True)
 
 

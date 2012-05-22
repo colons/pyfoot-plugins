@@ -12,6 +12,7 @@ class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [('weather current <<location>>', self.current),
                          ('weather forecast <<location>>', self.forecast)]
+
     def prepare(self):
         self.url = "http://www.google.com/ig/api?"
         
