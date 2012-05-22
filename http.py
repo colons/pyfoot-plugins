@@ -96,6 +96,7 @@ class Plugin(plugin.Plugin):
         all_controls_and_space = ' \x00-\x1F\x7F-\x9F'
         self.regexes = [
                 ('(?i).*https?://[^%s]' % all_controls_and_space, self.title),
+                ('(?i).*http://i.imgur.com/[^%s]' % all_controls_and_space, self.imgur)
                 ]
 
     def title(self, message, args):
@@ -117,7 +118,7 @@ class Plugin(plugin.Plugin):
                 url_parsed = urlparse.urlparse(word)
                 url_hostname = url_parsed.hostname
                 word = ajax_url(self.irc.strip_formatting(word))
-                request_headers = {'User-Agent': choice(user_agents)}
+                request_headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11'}
 
                 # GO!
                 start_time = time.time()
@@ -148,7 +149,8 @@ class Plugin(plugin.Plugin):
                         if resource.encoding == 'ISO-8859-1':
                             resource.encoding = chardet.detect(resource.content)['encoding']
                         try:
-                            title = re.findall('(?si)(?<=<title>).*(?=</title>)', resource.text)[0]
+                            title = re.findall('(?si)(?<=<title).*?>.*(?=</title>)', resource.text)[0]
+                            title = re.sub('.*?>', '', title)
                         except IndexError:
                             raise NoTitleError
                         title = re.sub('(?s)\s+', ' ', unescape(title).strip())
@@ -172,3 +174,12 @@ class Plugin(plugin.Plugin):
                 summary = '%s \x03#|\x03 %s \x03#|\x03 \x02%s\x02' % (title, time_length, url_hostname)
                 self.irc.privmsg(message.source, summary)
 
+    def general(self, message, args):
+        """ blah blah some stuff """
+        title(self, message, args)
+
+    def imgur(self, message, args):
+        """ blah blah docstring """
+        #for word in re.findall('(?i)https?://.*?(?=\\s|\\Z)', message.content.decode('utf-8')):
+        #    word = re.sub('(http://)i.imgur.com(/.*)\..*', '\\1imgur.com\\2', 'word')
+        title(self, message, args)
