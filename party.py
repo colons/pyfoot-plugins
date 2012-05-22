@@ -12,8 +12,8 @@ defaults = {
 
 
 def dupes(party):
-    """ Returns True if any phrase appears twice in our party """
-    if ''.join(party[-1:]) in party[:-1]:
+    """ Returns True if the latest phrase appears twice in our party """
+    if ''.join(party[-1:]) in [party[i] for i in range(0, len(party)-1, 2)]:
         return True
     else:
         return False
