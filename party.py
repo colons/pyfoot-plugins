@@ -24,15 +24,19 @@ class Plugin(plugin.Plugin):
 
     def register_commands(self):
         self.commands = [
-                ('party <<phrase>>', self.party)
+                ('party <<phrase>>', self.party),
+                ('partyvia <lang> <<phrase>>', self.partyvia),
                 ]
+    
 
     def party(self, message, args):
         """ A recreation of <a href="http://translationparty.com/">Translation Party</a> using the Bing translate API.
         $<comchar>party scissor me timbers
         >I have a tree.\x03# |\x03 \x027\x02 attempts\x03# |\x03 http://woof.bldm.us/party/<network>/Derasonika-120213-235608 """
-        transvia = self.conf.conf['party_via']
-    
+        try:
+            transvia = args['lang']
+        except AttributeError:
+            transvia = self.conf.conf['party_via']
 
         party = [args['phrase']]
         while dupes(party) == False:
@@ -47,11 +51,19 @@ class Plugin(plugin.Plugin):
             raise OSError('\'party_dir\' is not a directory')
         filepath = filepath+filename+'.txt'
 
+        sup = '\n'.join(party)
+        metadata = 'source: %s, via: %s' % (message.source, transvia)
+
         print ' -- Writing to %s...' % filepath
         file = open(filepath, mode='w')
-        sup = '\n'.join(party)
+        file.write(metadata)
         file.write(sup)
         file.close()
         
         attempts = (len(party)-1)/2
         self.irc.privmsg(message.source, '%s | \x02%i\x02 attempts | %sparty/%s/%s/' % (party[-1], attempts, self.conf.conf['web_url'], self.conf.alias, filename), pretty=True)
+
+
+    def partyvia(self, message, args):
+        """ Specify a language code, must be both <a href="http://msdn.microsoft.com/en-us/library/dd877907.aspx">here</a> and <a href="http://msdn.microsoft.com/en-us/library/dd877886.aspx">here</a> """
+        self.party(message, args)
