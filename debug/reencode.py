@@ -1,5 +1,5 @@
 import plugin
-import _rawsend
+from . import _rawsend
 
 class Plugin(plugin.Plugin):
     def register_commands(self):

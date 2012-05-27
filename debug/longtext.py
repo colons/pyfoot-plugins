@@ -1,6 +1,6 @@
 import plugin
-import _rawsend
-import _longtext
+from . import _rawsend
+from . import _longtext
 
 class Plugin(plugin.Plugin):
     def register_commands(self):
