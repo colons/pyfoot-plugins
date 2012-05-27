@@ -1,11 +1,11 @@
 import requests
-import urlparse
+import urllib.parse
 import re
 from random import choice
-import urllib
-from BaseHTTPServer import BaseHTTPRequestHandler
+import urllib.request, urllib.parse, urllib.error
+from http.server import BaseHTTPRequestHandler
 import chardet
-import htmlentitydefs
+import html.entities
 from hurry import filesize
 import time
 
@@ -43,7 +43,7 @@ FILESIZES = [
     ]
 # Regex range that matches all Unicode characters except the C0 (U+0000-U+001F) and
 # C1 (U+007F-U+009F) control characters and the space (U+0020)
-ALL_CONTROLS_AND_SPACE = u'[^\x00-\x20\x7f-\x9f]'
+ALL_CONTROLS_AND_SPACE = '[^\x00-\x20\x7f-\x9f]'
 
 def ajax_url(url):
     """ AJAX HTML snapshot URL parsing, pretty much required for a modern scraper.
@@ -54,15 +54,15 @@ def ajax_url(url):
     if hashbang_index != -1:
         base = url[:hashbang_index]
         joiner = '?' if '?' not in base else '&'
-        url = ''.join((base, joiner, '_escaped_fragment_=', urllib.quote(url[hashbang_index+2:], '!"$\'()*,/:;<=>?@[\\]^`{|}~')))
+        url = ''.join((base, joiner, '_escaped_fragment_=', urllib.parse.quote(url[hashbang_index+2:], '!"$\'()*,/:;<=>?@[\\]^`{|}~')))
     return url
 
 def prettify_url(url):
     """ Removes URL baggage to display a clean hostname/path.
     Passed a string or a urlparse.ParseResult object; return a string.
     """
-    if isinstance(url, urlparse.ParseResult) == False:
-        url = urlparse.urlparse(url)
+    if isinstance(url, urllib.parse.ParseResult) == False:
+        url = urllib.parse.urlparse(url)
     urlstr = url.hostname + url.path
     return urlstr if urlstr[-1] != '/' else urlstr[0:-1]
 
@@ -83,15 +83,15 @@ def html_unescape(text):
             # character reference
             try:
                 if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
+                    return chr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = chr(html.entities.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text # leave as is
@@ -108,13 +108,13 @@ class Plugin(plugin.Plugin):
 
     def register_commands(self):
         self.regexes = [
-                (u'(?i).*https?://%s' % ALL_CONTROLS_AND_SPACE, self.httpmeta)
+                ('(?i).*https?://%s' % ALL_CONTROLS_AND_SPACE, self.httpmeta)
                 ]
 
     def url_list(self, message):
-        urls = re.findall(u'(?i)https?://%s+' % ALL_CONTROLS_AND_SPACE, message.content)
+        urls = re.findall('(?i)https?://%s+' % ALL_CONTROLS_AND_SPACE, message.content)
         try:
-            blacklist = u'(?i)'
+            blacklist = '(?i)'
             for blacklisting in self.conf.conf['http_url_blacklist'][message.source]:
                 blacklist += blacklisting + '|'
             blacklist = blacklist[0:-1]
@@ -141,7 +141,7 @@ class Plugin(plugin.Plugin):
 
     def title(self, url):
         # Set it up.
-        url_parsed = urlparse.urlparse(url)
+        url_parsed = urllib.parse.urlparse(url)
         url_hostname = url_parsed.hostname
         url = ajax_url(self.irc.strip_formatting(url))
         request_headers = {'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11'}
@@ -151,13 +151,13 @@ class Plugin(plugin.Plugin):
         try:
             resource = requests.head(url, headers=request_headers, allow_redirects=True)
             if resource.status_code == 405:
-                resource = requests.get(url, headers=dict(request_headers.items() + [('Range', 'bytes=1-5')]), allow_redirects=True)
+                resource = requests.get(url, headers=dict(list(request_headers.items()) + [('Range', 'bytes=1-5')]), allow_redirects=True)
             else:
                 resource.raise_for_status()
 
             if resource.history != [] and resource.history[-1].status_code in REDIRECT_CODES:
                 url = resource.history[-1].headers['Location']
-                redirection_url = urlparse.urlparse(url)
+                redirection_url = urllib.parse.urlparse(url)
                 if redirection_url.netloc == '':
                     url = ''.join((url_parsed.scheme, '://', url_parsed.netloc, redirection_url.path))
                 elif redirection_url.hostname != url_hostname:
@@ -185,7 +185,7 @@ class Plugin(plugin.Plugin):
                 raise NoTitleError
         except requests.exceptions.ConnectionError:
             title = 'server connection error'
-        except requests.exceptions.HTTPError, httpe:
+        except requests.exceptions.HTTPError as httpe:
             title = '%s %s'.lower() % (httpe.response.status_code, BaseHTTPRequestHandler.responses[httpe.response.status_code][0])
         except NoTitleError:
             try:

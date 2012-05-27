@@ -2,7 +2,7 @@ import time
 #import codecs
 from os import path,mkdir
 
-from translate import Translator
+from .translate import Translator
 import plugin 
 
 defaults = {
@@ -54,7 +54,7 @@ class Plugin(plugin.Plugin):
         sup = '\n'.join(party)
         metadata = 'source: %s, via: %s' % (message.source, transvia)
 
-        print ' -- Writing to %s...' % filepath
+        print(' -- Writing to %s...' % filepath)
         file = open(filepath, mode='w')
         file.write(metadata)
         file.write(sup)
