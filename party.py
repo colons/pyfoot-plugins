@@ -3,7 +3,7 @@ import time
 from os import path,mkdir
 
 from .translate import Translator
-import plugin 
+import plugin
 
 defaults = {
         'party_via': 'ja',
@@ -27,22 +27,22 @@ class Plugin(plugin.Plugin):
                 ('party <<phrase>>', self.party),
                 ('partyvia <lang> <<phrase>>', self.partyvia),
                 ]
-    
+
 
     def party(self, message, args):
         """ A recreation of <a href="http://translationparty.com/">Translation Party</a> using the Bing translate API.
         $<comchar>party scissor me timbers
-        >I have a tree.\x03# |\x03 \x027\x02 attempts\x03# |\x03 http://woof.bldm.us/party/<network>/Derasonika-120213-235608 """
+        >I have a tree. \x03#|\x03 \x027\x02 attempts \x03#|\x03 http://woof.bldm.us/party/<network>/luser-120213-235608 """
         try:
             transvia = args['lang']
-        except AttributeError:
+        except KeyError:
             transvia = self.conf.conf['party_via']
 
         party = [args['phrase']]
         while dupes(party) == False:
             party.append(self.translator.translate('en', transvia, party[-1]))
             party.append(self.translator.translate(transvia, 'en', party[-1]))
-        
+
         filename = '%s-%s' % (message.nick, time.strftime('%y%m%d-%H%M%S'))
         filepath = path.expanduser(self.conf.conf['party_dir']+self.conf.alias+'/')
         if not path.exists(filepath):
@@ -52,14 +52,14 @@ class Plugin(plugin.Plugin):
         filepath = filepath+filename+'.txt'
 
         sup = '\n'.join(party)
-        metadata = 'source: %s, via: %s' % (message.source, transvia)
+        metadata = 'source: %s, via: %s\n\n' % (message.source, transvia)
 
         print(' -- Writing to %s...' % filepath)
         file = open(filepath, mode='w')
         file.write(metadata)
         file.write(sup)
         file.close()
-        
+
         attempts = (len(party)-1)/2
         self.irc.privmsg(message.source, '%s | \x02%i\x02 attempts | %sparty/%s/%s/' % (party[-1], attempts, self.conf.conf['web_url'], self.conf.alias, filename), pretty=True)
 

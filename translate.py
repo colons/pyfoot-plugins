@@ -1,4 +1,3 @@
-#from BeautifulSoup import BeautifulStoneSoup
 import urllib.request, urllib.parse, urllib.error
 
 import plugin
@@ -12,12 +11,13 @@ class Translator(object):
         query = urllib.parse.quote(phrase)
         page = urllib.request.urlopen('http://api.microsofttranslator.com/V2/Ajax.svc/Translate?appId=%s&from=%s&to=%s&text="%s"' % (self.bing_app_id, source, target, query))
         result = page.read()
-        if result[4:-1].startswith('ArgumentOutOfRangeException: '):
+        if result[4:-1].startswith(b'ArgumentOutOfRangeException: '):
             raise NameError("that's not a language, silly")
 
-        print(' -- %s' % result[4:-1])
+        result = result[4:-1].decode('utf-8')
+        print(' -- %s' % result)
 
-        return result[4:-1]
+        return result
 
 
 class Plugin(plugin.Plugin):

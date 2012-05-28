@@ -1,4 +1,4 @@
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import plugin
 from random import choice
 import re
@@ -13,7 +13,7 @@ class Plugin(plugin.Plugin):
         self.url = 'http://srcommunity.org/w/index.php?action=raw&title=%s'
 
     def get_wikitext(self, title):
-        wikitext = urllib2.urlopen(self.url % (title)).read()
+        wikitext = urllib.request.urlopen(self.url % (title)).read()
         return wikitext
 
     def reformat(self, line):
