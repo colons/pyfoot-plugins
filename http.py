@@ -100,7 +100,7 @@ def html_unescape(text):
 class Plugin(plugin.Plugin):
     """ Returns metadata about HTTP URLs. """
 
-    def prepare(self):
+    #def prepare(self):
         #self.url_regexes = [
         #        ('(?i)i\.imgur\.com/%s+\.' % ALL_CONTROLS_AND_SPACE, self.imgur),
         #        ]
