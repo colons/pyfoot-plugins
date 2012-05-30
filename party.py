@@ -51,17 +51,23 @@ class Plugin(plugin.Plugin):
             raise OSError("'party_dir' is not a directory")
         filepath = filepath+filename+'.txt'
 
-        sup = '\n'.join(party)
-        metadata = 'source: %s, via: %s\n\n' % (message.source, transvia)
+        if message.source == message.nick:  # Message is in a query, no logging the party
+            the_party_web = ''
+        else:
+            the_party = '\n'.join(party)
+            metadata = 'source: %s, via: %s\n\n' % (message.source, transvia)
 
-        print(' -- Writing to %s...' % filepath)
-        file = open(filepath, mode='w')
-        file.write(metadata)
-        file.write(sup)
-        file.close()
+            print(' -- Writing to %s...' % filepath)
+            file = open(filepath, mode='w')
+            file.write(metadata)
+            file.write(the_party)
+            file.close()
+            the_party_web = ' | %sparty/%s/%s/' % (self.conf.conf['web_url'], self.conf.alias, filename)
 
         attempts = (len(party)-1)/2
-        self.irc.privmsg(message.source, '%s | \x02%i\x02 attempts | %sparty/%s/%s/' % (party[-1], attempts, self.conf.conf['web_url'], self.conf.alias, filename), pretty=True)
+        out = '%s | \x02%i\x02 attempts' % (party[-1], attempts) + the_party_web
+
+        self.irc.privmsg(message.source, out, pretty=True)
 
 
     def partyvia(self, message, args):
