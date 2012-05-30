@@ -101,9 +101,8 @@ class Plugin(plugin.Plugin):
     """ Returns metadata about HTTP URLs. """
 
     def prepare(self):
-        self.use_unicode = True
         #self.url_regexes = [
-        #        (u'(?i)i\.imgur\.com/%s+' % ALL_CONTROLS_AND_SPACE, self.imgur),
+        #        ('(?i)i\.imgur\.com/%s+\.' % ALL_CONTROLS_AND_SPACE, self.imgur),
         #        ]
 
     def register_commands(self):
