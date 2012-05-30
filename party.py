@@ -48,7 +48,7 @@ class Plugin(plugin.Plugin):
         if not path.exists(filepath):
             mkdir(filepath)
         elif path.exists(filepath) and not path.isdir(filepath):
-            raise OSError('\'party_dir\' is not a directory')
+            raise OSError("'party_dir' is not a directory")
         filepath = filepath+filename+'.txt'
 
         sup = '\n'.join(party)
