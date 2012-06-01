@@ -1,4 +1,4 @@
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import json
 from random import choice
 from math import fabs
@@ -35,7 +35,7 @@ class Plugin(plugin.Plugin):
             self.malusers = pickle.load(userfile)
             userfile.close()
         except:
-            print ' :: error reading MAL user pickle, will create one when necessary'
+            print(' :: error reading MAL user pickle, will create one when necessary')
     
     def define(self, message, args):
         """ Many of these functions benefit from knowing whose IRC nicks correspond to which MAL user, so be sure to tell <pyfoot> who you are.
@@ -45,7 +45,7 @@ class Plugin(plugin.Plugin):
 
         try:
             data = self.query('animelist/%s' % user)
-        except urllib2.HTTPError:
+        except urllib.error.HTTPError:
             self.irc.privmsg(message.source, self.help_missing % user, pretty=True)
         else:
             try: # just in case other instances of pyfoot have altered the file since we last read it
@@ -53,7 +53,7 @@ class Plugin(plugin.Plugin):
                 malusers = pickle.load(userfile)
                 userfile.close()
             except:
-                print ' :: error reading MAL user pickle, creating one now'
+                print(' :: error reading MAL user pickle, creating one now')
 
             malusers[self.conf.conf['network_address']+' '+message.nick.lower()] = user 
             userfile = open(self.user_file_path, 'w')
@@ -111,7 +111,7 @@ class Plugin(plugin.Plugin):
 
         try:
             data = self.query('animelist/%s' % user)
-        except urllib2.HTTPError:
+        except urllib.error.HTTPError:
             self.irc.privmsg(message.source, self.help_missing % user, pretty=True)
             return
 
@@ -140,7 +140,7 @@ class Plugin(plugin.Plugin):
         for user in users:
             try:
                 data = self.query('animelist/%s' % user)
-            except urllib2.HTTPError:
+            except urllib.error.HTTPError:
                 return self.help_missing % user
             ud_list.append(data)
         
@@ -265,14 +265,14 @@ class Plugin(plugin.Plugin):
         >\x02Nyoro-n Churuya-san\x02\x03# :\x03 ONA\x03# |\x03 http://myanimelist.net/anime/5957\x03# |\x03 An anime adaptation of the 4-panel strip manga release: Nyoron Churuya-san. Based on Suzumiya Haruhi's energetic and 'always up to go' character, Tsuruya."""
         query = args['query']
 
-        search = self.query('anime/search', ['q=%s' % urllib2.quote(query)])
+        search = self.query('anime/search', ['q=%s' % urllib.parse.quote(query)])
 
         # data = self.query('anime/%i' % search[0]['id'])
         try:
             keion = search[0]
         except IndexError:
             self.irc.privmsg(message.source,
-                    'no results | http://myanimelist.net/anime.php?q=%s' % urllib2.quote(query),
+                    'no results | http://myanimelist.net/anime.php?q=%s' % urllib.parse.quote(query),
                     pretty=True)
             return
 
@@ -290,10 +290,10 @@ class Plugin(plugin.Plugin):
 
     def query(self, query, additional_args=[]):
         args = '&'.join(self.default_args+additional_args)
-        print ' -- '+self.url % (query, args)
-        data = json.load(urllib2.urlopen(self.url % (query, args)))
+        print(' -- '+self.url % (query, args))
+        data = json.load(urllib.request.urlopen(self.url % (query, args)))
         return data
 
 
     def correlate(self, id1, id2):
-        print 'hi'
+        print('hi')

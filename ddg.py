@@ -1,5 +1,5 @@
 import json
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 import plugin 
 
@@ -15,13 +15,13 @@ class Plugin(plugin.Plugin):
 
     def query(self, query):
         # response = urllib2.urlopen(self.url % query, None, {'User-Agent': 'pyfoot/hg bitbucket.org/colons/pyfoot/'})
-        response = urllib2.urlopen(self.url % query)
+        response = urllib.request.urlopen(self.url % query)
         data = json.load(response)
         return data
     
     def get_answer(self, query):
         data = self.query(query)
-        print data['Answer']
+        print(data['Answer'])
         if data['Answer'] == "Safe search filtered your search to: <b>off</b>. Use !safeoff command to turn off temporarily.":
             return "sorry, duckduckgo can't deal with dirty words, the pussies"
 
@@ -49,7 +49,7 @@ class Plugin(plugin.Plugin):
         """ Issue a <a href="http://duckduckgo.com/api.html">DuckDuckGo</a> query.
         $<comchar>ddg 2^10
         >\x02calc\x02\x03# :\x03 2 ^ 10 = 1,024\x03# |\x03 http://ddg.gg/?q=2%5E10 """
-        query = urllib2.quote(args['query'])
+        query = urllib.parse.quote(args['query'])
 
         answer = self.get_answer(query)
 

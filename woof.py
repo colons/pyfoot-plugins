@@ -12,7 +12,7 @@ class Plugin(plugin.Plugin):
                 ]
 
     def woof(self, message, args):
-        """ He's a <a href="http://d.bldm.us/gallery/photos/a3300/120125%20006.jpg">dog</a>; he's excitable.
+        """ Xe's a <a href="http://d.bldm.us/gallery/photos/a3300/120125%20006.jpg">dog</a>; xe's excitable.
         $woof
         >woof"""
         self.irc.privmsg(message.source, self.conf.conf['woof_greeting'])

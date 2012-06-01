@@ -7,6 +7,6 @@ def send(irc, target, message):
         pass
 
     message = 'PRIVMSG %s :%s\r\n' % (target, message)
-    print ' >> %s' % message
+    print(' >> %s' % message)
 
     irc.socket.send(message)
