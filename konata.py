@@ -3,7 +3,7 @@ import plugin
 class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
-                ('konata <nick>', self.konata)
+                ('konata <<nick>>', self.konata)
                 ]
 
     def konata(self, message, args):
