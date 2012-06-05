@@ -43,7 +43,7 @@ FILESIZES = [
     ]
 # Regex range that matches all Unicode characters except the C0 (U+0000-U+001F) and
 # C1 (U+007F-U+009F) control characters and the space (U+0020)
-ALL_CONTROLS_AND_SPACE = '[^\x00-\x20\x7f-\x9f]'
+ALL_CONTROLS_AND_SPACE = '[^\u0000-\u0020\u007f-\u009f]'
 
 def ajax_url(url):
     """ AJAX HTML snapshot URL parsing, pretty much required for a modern scraper.
@@ -150,7 +150,9 @@ class Plugin(plugin.Plugin):
         try:
             resource = requests.head(url, headers=request_headers, allow_redirects=True)
             if resource.status_code == 405:
-                resource = requests.get(url, headers=dict(list(request_headers.items()) + [('Range', 'bytes=1-5')]), allow_redirects=True)
+                request_headers['Range'] = 'bytes=1-5'
+                resource = requests.get(url, headers=request_headers, allow_redirects=True)
+                del request_headers['Range']
             else:
                 resource.raise_for_status()
 
