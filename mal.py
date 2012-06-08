@@ -31,7 +31,7 @@ class Plugin(plugin.Plugin):
         self.help_missing = 'no such MAL user \x02%s\x02'
         
         try:
-            userfile = open(self.user_file_path)
+            userfile = open(self.user_file_path, 'rb')
             self.malusers = pickle.load(userfile)
             userfile.close()
         except:
@@ -49,14 +49,17 @@ class Plugin(plugin.Plugin):
             self.irc.privmsg(message.source, self.help_missing % user, pretty=True)
         else:
             try: # just in case other instances of pyfoot have altered the file since we last read it
-                userfile = open(self.user_file_path)
+                userfile = open(self.user_file_path, 'rb')
+            except IOError:
+                print(' :: error reading MAL user pickle, creating one now')
+                malusers = {}
+            else:
                 malusers = pickle.load(userfile)
                 userfile.close()
-            except:
-                print(' :: error reading MAL user pickle, creating one now')
 
-            malusers[self.conf.conf['network_address']+' '+message.nick.lower()] = user 
-            userfile = open(self.user_file_path, 'w')
+            malusers[self.conf.alias+' '+message.nick.lower()] = user 
+
+            userfile = open(self.user_file_path, 'wb')
             pickle.dump(malusers, userfile)
             userfile.close()
             self.irc.privmsg(message.source, '\x02%s\x02 is now MAL user \x02%s\x02 | http://myanimelist.net/profile/\x02%s' % (message.nick, user, user), pretty=True)
@@ -64,12 +67,19 @@ class Plugin(plugin.Plugin):
     
     def maluser(self, user):
         """ Takes a user - irc or mal - and determines the appropriate MAL username """
-        userfile = open(self.user_file_path)
-        malusers = pickle.load(userfile)
-        userfile.close()
+        try:
+            userfile = open(self.user_file_path, 'rb')
+        except IOError:
+            print(' :: no MAL user pickle found, ignoring')
+            malusers = {}
+        else:
+            malusers = pickle.load(userfile)
+            userfile.close()
+            
+        print(malusers)
 
         try:
-            maluser = malusers[self.conf.conf['network_address']+' '+user.lower()]
+            maluser = malusers[self.conf.alias+' '+user.lower()]
         except KeyError:
             return user
         else:
@@ -291,7 +301,8 @@ class Plugin(plugin.Plugin):
     def query(self, query, additional_args=[]):
         args = '&'.join(self.default_args+additional_args)
         print(' -- '+self.url % (query, args))
-        data = json.load(urllib.request.urlopen(self.url % (query, args)))
+        raw_data = urllib.request.urlopen(self.url % (query, args)).read().decode('utf-8')
+        data = json.loads(raw_data)
         return data
 
 
