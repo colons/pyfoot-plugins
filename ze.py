@@ -14,6 +14,7 @@ class Plugin(plugin.Plugin):
 
     def get_wikitext(self, title):
         wikitext = urllib.request.urlopen(self.url % (title)).read()
+        wikitext = wikitext.decode("utf-8")
         return wikitext
 
     def reformat(self, line):
