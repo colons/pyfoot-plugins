@@ -82,6 +82,8 @@ class Plugin(plugin.Plugin):
         party = party_file.readlines()
         party_file.close()
 
+        metadata_string = False
+
         if party[0].startswith('source: '):
             metadata_string = party[0]
             party = party[2:]
@@ -97,10 +99,11 @@ class Plugin(plugin.Plugin):
                 'url': party_filename[:-4]+'/',
                 }
 
-        for entry in metadata_string.split(','):
-            key = entry.split(':')[0].strip()
-            value = entry.split(':')[1].strip()
-            party_dict[key] = value
+        if metadata_string:
+            for entry in metadata_string.split(','):
+                key = entry.split(':')[0].strip()
+                value = entry.split(':')[1].strip()
+                party_dict[key] = value
 
         return party_dict
 
@@ -114,7 +117,7 @@ class Plugin(plugin.Plugin):
 
         for party_filename in party_files:
             party_dict = self.get_party(party_filename)
-            if party_dict['source'].startswith('#'):
+            if not 'source' in party_dict or party_dict['source'].startswith('#'):
                 parties.append(party_dict)
 
         parties.sort(key=lambda p:int(p['date']+p['time']), reverse=True)

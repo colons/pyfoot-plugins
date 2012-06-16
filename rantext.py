@@ -6,6 +6,7 @@ import plugin
 
 defaults = {
         'rantext_sources': [],
+        'rantext_frames': {},
         }
 
 class Plugin(plugin.Plugin):
@@ -33,8 +34,12 @@ class Plugin(plugin.Plugin):
             self.commands.append(('%s <nick>' % source, targetted_func))
 
     def rantext(self, message, args):
-        source = self.sources[args['_command'].split(' ')[0]]
+        sourcename = args['_command'].split(' ')[0]
+        source = self.sources[sourcename]
         line = choice(source)
+
+        if sourcename in self.conf.conf['rantext_frames']:
+            line = self.conf.conf['rantext_frames'][sourcename] % line
 
         if 'nick' in args:
             line = '%s: %s' % (args['nick'], line)

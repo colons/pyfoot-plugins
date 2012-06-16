@@ -7,8 +7,11 @@
     </div>
     %for party in parties:
     <div class="key">
-        <p class='irc'>{{party['nick']}}</p>
-        <p class='irc'>{{party['source']}}</p>
+        % for key in ['nick', 'source']:
+        % if key in party:
+        <p class='irc'>{{party[key]}}</p>
+        %end
+        %end
     </div>
     <div class="item">
         <p>{{party['initial']}} <span class="separator">-&gt;</span> {{party['final']}}</p>
