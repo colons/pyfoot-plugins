@@ -31,7 +31,7 @@ class Plugin(plugin.Plugin):
             targetted_func = lambda message, args: self.rantext(message, args)
 
             self.commands.append((source, everyone_func))
-            self.commands.append(('%s <nick>' % source, targetted_func))
+            self.commands.append(('%s <<nick>>' % source, targetted_func))
 
     def rantext(self, message, args):
         sourcename = args['_command'].split(' ')[0]
