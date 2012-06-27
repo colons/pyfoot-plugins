@@ -139,9 +139,13 @@ class Plugin(plugin.Plugin):
         
         selection = self.select(consumed)
 
-        summary = 'http://myanimelist.net/animelist/\x02%s\x02 | \x02%s\x02 days across \x02%d\x02 shows | %s' % (user, days, len(consumed),
-                ' | '.join(['%s : \x02%s\x02/\x02%s\x02 : \x02%s\x02' % (a['title'], self.oiz(a['watched_episodes']),
-                    self.oiz(a['episodes']), self.oiz(a['score'])) for a in selection]))
+        if len(selection) == 0:
+            showlist_string = ''
+        else:
+            showlist_string = ' | %s' % ' | '.join(['%s : \x02%s\x02/\x02%s\x02 : \x02%s\x02' % (a['title'], self.oiz(a['watched_episodes']),
+                    self.oiz(a['episodes']), self.oiz(a['score'])) for a in selection])
+
+        summary = 'http://myanimelist.net/animelist/\x02%s\x02 | \x02%s\x02 days across \x02%d\x02 shows%s' % (user, days, len(consumed), showlist_string)
         self.irc.privmsg(message.source, summary, pretty=True)
     
     def common_shows(self, users):

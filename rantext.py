@@ -17,7 +17,7 @@ class Plugin(plugin.Plugin):
         self.sources = {}
 
         for source in self.conf.conf['rantext_sources']:
-            filename = self.conf.conf['content_dir']+source+'.txt'
+            filename = '%s/rantext/%s.txt' % (self.conf.conf['content_dir'], source)
             file = open(filename)
             line_list = []
             for line in file:
@@ -31,7 +31,7 @@ class Plugin(plugin.Plugin):
             targetted_func = lambda message, args: self.rantext(message, args)
 
             self.commands.append((source, everyone_func))
-            self.commands.append(('%s <nick>' % source, targetted_func))
+            self.commands.append(('%s <<nick>>' % source, targetted_func))
 
     def rantext(self, message, args):
         sourcename = args['_command'].split(' ')[0]

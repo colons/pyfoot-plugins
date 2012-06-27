@@ -9,7 +9,8 @@ def f_to_c(f):
 class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [('weather current <<location>>', self.current),
-                         ('weather forecast <<location>>', self.forecast)]
+                         ('weather forecast <<location>>', self.forecast),
+                         ('weather today <<location>>', self.today)]
 
     def prepare(self):
         self.url = "http://www.google.com/ig/api?"
@@ -59,4 +60,12 @@ class Plugin(plugin.Plugin):
             condition = elements.getElementsByTagName("condition")[0].getAttribute("data")
             msg += conditions_str % (day.lower(), high_f, high_c, low_f, low_c, condition.lower())
 
+            if 'today' in args:
+                break
+
         self.irc.privmsg(message.source, msg)
+
+    def today(self, message, args):
+        """ Like the above, but for one day only. """
+        args['today'] = True
+        self.forecast(message, args)
