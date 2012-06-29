@@ -26,7 +26,7 @@ class Plugin(plugin.Plugin):
 
         for source in self.sources:
             everyone_func = lambda message, args: self.rantext(message, args)
-            everyone_func.__doc__ = '$<comchar>%s\n>%s' % (source, choice(self.sources[source]))
+            everyone_func.__doc__ = '>%s' % choice(self.sources[source])
 
             targetted_func = lambda message, args: self.rantext(message, args)
 
