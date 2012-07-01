@@ -176,7 +176,7 @@ class Plugin(plugin.Plugin):
                 if resource.encoding == 'ISO-8859-1':
                     resource.encoding = chardet.detect(resource.content)['encoding']
                 try:
-                    title = re.findall('(?si)(?<=<title).*?>.*(?=</title>)', resource.text)[0]
+                    title = re.findall('(?si)(?<=<title).*?>.*?(?=</title>)', resource.text)[0]
                     title = re.sub('.*?>', '', title)
                 except IndexError:
                     raise NoTitleError
