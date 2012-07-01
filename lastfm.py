@@ -33,13 +33,14 @@ class Plugin(plugin.Plugin):
         self.help_missing = 'no such Last.fm user \x02%s\x02'
 
         self.np_string = '%s \x03#|\x03 http://www.last.fm/user/\x02%s\x02'
+        self.pp_string = self.np_string % ('%s \x03#|\x03 played %s', '%s')
         
         try:
             userfile = open(self.user_file_path, 'rb')
             self.lastfmusers = pickle.load(userfile)
             userfile.close()
         except:
-            print(' :: error reading MAL user pickle, will create one when necessary')
+            print(' :: error reading lastfm user pickle, will create one when necessary')
     
     def define(self, message, args):
         """ Let <pyfoot> know who you are.
@@ -107,26 +108,29 @@ class Plugin(plugin.Plugin):
         else:
             np = False
 
+        metadata = []
+        metadata.append('\x02%s\x02' % track['name'])
+        metadata.append(track['artist']['#text'])
+
+        if track['album']['#text'] != '':
+            metadata.append(track['album']['#text'])
+
+        metadata_string = ' \x03#:\x03 '.join(metadata)
+
         if np:
-            metadata = []
-            metadata.append('\x02%s\x02' % track['name'])
-            metadata.append(track['artist']['#text'])
-
-            if track['album']['#text'] != '':
-                metadata.append(track['album']['#text'])
-
-            report = self.np_string % (' \x03#:\x03 '.join(metadata), data['@attr']['user'])
+            report = self.np_string % (metadata_string, data['@attr']['user'])
         else:
-            report = self.np_string % ('not currently playing anything', data['@attr']['user'])
+
+            report = self.pp_string % (metadata_string, track['date']['#text'], data['@attr']['user'])
 
         self.irc.privmsg(message.source, report)
 
     def lastfmuser(self, user):
-        """ Takes a user - irc or lastfm - and determines the appropriate MAL username """
+        """ Takes a user - irc or lastfm - and determines the appropriate lastfm username """
         try:
             userfile = open(self.user_file_path, 'rb')
         except IOError:
-            print(' :: no MAL user pickle found, ignoring')
+            print(' :: no lastfm user pickle found, ignoring')
             lastfmusers = {}
         else:
             lastfmusers = pickle.load(userfile)
