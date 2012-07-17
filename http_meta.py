@@ -16,6 +16,9 @@ defaults = {
         'http_url_blacklist': {
             #'#noimgur': ['imgur\.com'],
             },
+
+        # whether to print mime-type and other metadata if <title> is unavailable
+        'http_mime': True,
         }
 
 # List of common browser user agents.
@@ -130,7 +133,9 @@ class Plugin(plugin.Plugin):
         #<strong>imgur:</strong> Returns the title (if available) and file size of images posted on Imgur.
         urls = self.url_list(message)
         for url in urls:
-            self.irc.privmsg(message.source, self.title(url))
+            title = self.title(url)
+            if title:
+                self.irc.privmsg(message.source, title)
 
         #def imgur(self, message, args):
         #for word in re.findall('(?i)https?://.*?(?=\\s|\\Z)', message.content.decode('utf-8')):
@@ -189,6 +194,10 @@ class Plugin(plugin.Plugin):
         except requests.exceptions.HTTPError as httpe:
             title = '%s %s'.lower() % (httpe.response.status_code, BaseHTTPRequestHandler.responses[httpe.response.status_code][0])
         except NoTitleError:
+            if not self.conf.conf['http_mime']:
+                # stop here
+                return None
+
             try:
                 data_length = filesize.size(float(resource.headers['Content-Length']), FILESIZES)
             except TypeError:
