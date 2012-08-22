@@ -15,8 +15,8 @@ class Plugin(plugin.Plugin):
 
     def query(self, query):
         # response = urllib2.urlopen(self.url % query, None, {'User-Agent': 'pyfoot/hg bitbucket.org/colons/pyfoot/'})
-        response = urllib.request.urlopen(self.url % query)
-        data = json.load(response)
+        response = urllib.request.urlopen(self.url % query).read().decode('utf-8')
+        data = json.loads(response)
         return data
     
     def get_answer(self, query):
