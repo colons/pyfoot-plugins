@@ -1,10 +1,17 @@
 import plugin
 import urllib.request, urllib.error, urllib.parse
-from urllib.parse import urlencode
-from xml.dom import minidom
+from urllib.parse import quote 
+import json
+
+defaults = {
+        'wunderground_key': '',
+        'forecasts_per_message': 4,
+        }
+
 
 def f_to_c(f):
     return (f - 32) * (5./9.)
+
 
 class Plugin(plugin.Plugin):
     def register_commands(self):
@@ -13,27 +20,50 @@ class Plugin(plugin.Plugin):
                          ('weather today <<location>>', self.today)]
 
     def prepare(self):
-        self.url = "http://www.google.com/ig/api?"
+        self.url = "http://api.wunderground.com/api/" + self.conf.conf['wunderground_key'] + "/%s/q/%s.json"
+
+        self.current_msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph"
+        self.suggestions_msg = "\x02matches\x02 \x03#|\x03 %s"
+        # self.conditions_str = " \x03#|\x03 \x02%s\x02 \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s"
+        self.conditions_str = "%s \x03#:\x03 %s"
+
+    def loc_string(self, location):
+        """ Creates a human-readable location string based on a wunderground result """
+        if 'full' in location: return location['full']
+
+        return ', '.join([location[size] for size in ['name', 'state', 'country'] if location[size] != ''])
+
+    def suggest(self, data):
+        results = data['response']['results']
+        suggestions = [self.loc_string(r) for r in results]
+        suggestions_str = ' \x03#|\x03 '.join(suggestions)
+        msg = self.suggestions_msg % suggestions_str
+        return msg
 
     def current(self, message, args):
         """ Fetches the current weather in <span class="irc"><span class="repl">location</span></span>.
         $<comchar>w c stafford, uk
         >\x02Stafford, Staffordshire\x02 \x03#|\x03 61\u00b0F \x03#:\x03 16\u00b0C \x03#|\x03 humidity \x03#:\x03 68% \x03#|\x03 wind \x03#:\x03 W at 9 mph
         """
+        url = self.url % ('conditions', quote(args["location"]))
+        print(url)
+        data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
 
-        url = self.url + urlencode({"weather":args["location"]})
-        data = urllib.request.urlopen(url)
-        dom = minidom.parse(data)
+        if 'results' in data['response']:
+            msg = self.suggest(data)
+        else:
+            conditions = data['current_observation']
 
-        msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s"
+            city = self.loc_string(conditions['display_location'])
 
-        city = dom.getElementsByTagName("city")[0].getAttribute("data")
-        tempf = dom.getElementsByTagName("temp_f")[0].getAttribute("data")
-        tempc = dom.getElementsByTagName("temp_c")[0].getAttribute("data")
-        humidity = dom.getElementsByTagName("humidity")[0].getAttribute("data")[10:]
-        wind = dom.getElementsByTagName("wind_condition")[0].getAttribute("data")[6:]
+            tempf = conditions['temp_f']
+            tempc = conditions['temp_c']
+            humidity = conditions['relative_humidity']
+            wind_mph = conditions['wind_mph']
+            wind_dir = conditions['wind_dir'].lower()
 
-        msg = msg % (city, tempf, tempc, humidity, wind)
+            msg = self.current_msg % (city, tempf, tempc, humidity, wind_dir, wind_mph)
+
         self.irc.privmsg(message.source, msg)
 
     def forecast(self, message, args):
@@ -42,28 +72,28 @@ class Plugin(plugin.Plugin):
         >\x02Crewe, Cheshire East\x02 \x03#|\x03 \x02mon\x02 \x03#:\x03 high 70\u00b0F 21\u00b0C \x03#:\x03 low 48\u00b0F 8\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02tue\x02 \x03#:\x03 high 75\u00b0F 23\u00b0C \x03#:\x03 low 50\u00b0F 10\u00b0C \x03#:\x03 clear \x03#|\x03 \x02wed\x02 \x03#:\x03 high 82\u00b0F 27\u00b0C \x03#:\x03 low 59\u00b0F 15\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02thu\x02 \x03#:\x03 high 77\u00b0F 25\u00b0C \x03#:\x03 low 52\u00b0F 11\u00b0C \x03#:\x03 cloudy
         """
 
-        url = self.url + urlencode({"weather": args["location"]})
-        data = urllib.request.urlopen(url)
-        dom = minidom.parse(data)
+        url = self.url % ('forecast', quote(args["location"]))
+        print(url)
+        data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+        
+        if 'results' in data['response']:
+            msg = self.suggest(data)
+            self.irc.privmsg(message.source, msg)
 
-        msg = '\x02%s\x02' % dom.getElementsByTagName("city")[0].getAttribute("data")
+        else:
+            forecast = data['forecast']['txt_forecast']['forecastday']
+            summaries = []
 
-        conditions = dom.getElementsByTagName("forecast_conditions")
-        conditions_str = " \x03#|\x03 \x02%s\x02 \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s"
-
-        for elements in conditions:
-            day = elements.getElementsByTagName("day_of_week")[0].getAttribute("data")
-            high_f = elements.getElementsByTagName("high")[0].getAttribute("data")
-            high_c = '%i' % f_to_c(int(high_f))
-            low_f = elements.getElementsByTagName("low")[0].getAttribute("data")
-            low_c = '%i' % f_to_c(int(low_f))
-            condition = elements.getElementsByTagName("condition")[0].getAttribute("data")
-            msg += conditions_str % (day.lower(), high_f, high_c, low_f, low_c, condition.lower())
-
+            for day in forecast:
+                summaries.append(self.conditions_str % (day['title'].lower(), day['fcttext']))
+                
             if 'today' in args:
-                break
+                summaries = summaries[:2]
 
-        self.irc.privmsg(message.source, msg)
+            while summaries:
+                msg = ' \x03#|\x03 '.join(summaries[0:self.conf.conf['forecasts_per_message']])
+                summaries = summaries[self.conf.conf['forecasts_per_message']:]
+                self.irc.privmsg(message.source, msg)
 
     def today(self, message, args):
         """ Like the above, but for one day only. """
