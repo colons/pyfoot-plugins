@@ -24,8 +24,8 @@ class Plugin(plugin.Plugin):
 
         self.current_msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph"
         self.suggestions_msg = "\x02matches\x02 \x03#|\x03 %s"
-        # self.conditions_str = " \x03#|\x03 \x02%s\x02 \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s"
-        self.conditions_str = "%s \x03#:\x03 %s"
+        self.conditions_str = '\x02%s\x02 \x03#:\x03 %s" rain \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
+        # self.conditions_str = "%s \x03#:\x03 %s"
 
     def loc_string(self, location):
         """ Creates a human-readable location string based on a wunderground result """
@@ -72,7 +72,7 @@ class Plugin(plugin.Plugin):
         >\x02Crewe, Cheshire East\x02 \x03#|\x03 \x02mon\x02 \x03#:\x03 high 70\u00b0F 21\u00b0C \x03#:\x03 low 48\u00b0F 8\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02tue\x02 \x03#:\x03 high 75\u00b0F 23\u00b0C \x03#:\x03 low 50\u00b0F 10\u00b0C \x03#:\x03 clear \x03#|\x03 \x02wed\x02 \x03#:\x03 high 82\u00b0F 27\u00b0C \x03#:\x03 low 59\u00b0F 15\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02thu\x02 \x03#:\x03 high 77\u00b0F 25\u00b0C \x03#:\x03 low 52\u00b0F 11\u00b0C \x03#:\x03 cloudy
         """
 
-        url = self.url % ('forecast', quote(args["location"]))
+        url = self.url % ('forecast10day', quote(args["location"]))
         print(url)
         data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
         
@@ -81,11 +81,23 @@ class Plugin(plugin.Plugin):
             self.irc.privmsg(message.source, msg)
 
         else:
-            forecast = data['forecast']['txt_forecast']['forecastday']
+            forecast = data['forecast']['simpleforecast']['forecastday']
             summaries = []
 
             for day in forecast:
-                summaries.append(self.conditions_str % (day['title'].lower(), day['fcttext']))
+                from pprint import pprint
+                pprint(day)
+                summaries.append(self.conditions_str % (
+                    day['date']['weekday'].lower(),
+                    day['qpf_allday']['in'],
+                    day['high']['fahrenheit'],
+                    day['high']['celsius'],
+                    day['low']['fahrenheit'],
+                    day['low']['celsius'],
+                    day['avehumidity'],
+                    day['avewind']['dir'].lower(),
+                    day['avewind']['mph']
+                    ))
                 
             if 'today' in args:
                 summaries = summaries[:2]
