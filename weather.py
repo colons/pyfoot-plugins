@@ -5,7 +5,8 @@ import json
 
 defaults = {
         'wunderground_key': '',
-        'forecasts_per_message': 4,
+        'forecasts_per_message': 3,
+        'days_ahead': 6,
         }
 
 
@@ -24,7 +25,7 @@ class Plugin(plugin.Plugin):
 
         self.current_msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph"
         self.suggestions_msg = "\x02matches\x02 \x03#|\x03 %s"
-        self.conditions_str = '\x02%s\x02%s \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
+        self.conditions_str = '\x02%s\x02 \x03#:\x03 %s%s \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
         # self.conditions_str = "%s \x03#:\x03 %s"
 
     def loc_string(self, location):
@@ -98,6 +99,7 @@ class Plugin(plugin.Plugin):
 
                 summaries.append(self.conditions_str % (
                     day['date']['weekday'].lower(),
+                    day['conditions'].lower(),
                     precip_str,
                     day['high']['fahrenheit'],
                     day['high']['celsius'],
@@ -109,7 +111,9 @@ class Plugin(plugin.Plugin):
                     ))
                 
             if 'today' in args:
-                summaries = summaries[:2]
+                summaries = summaries[:1]
+            else:
+                summaries = summaries[:self.conf.conf['days_ahead']]
 
             while summaries:
                 msg = ' \x03#|\x03 '.join(summaries[0:self.conf.conf['forecasts_per_message']])
