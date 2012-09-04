@@ -24,7 +24,7 @@ class Plugin(plugin.Plugin):
 
         self.current_msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph"
         self.suggestions_msg = "\x02matches\x02 \x03#|\x03 %s"
-        self.conditions_str = '\x02%s\x02 \x03#:\x03 %s" rain \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
+        self.conditions_str = '\x02%s\x02%s \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
         # self.conditions_str = "%s \x03#:\x03 %s"
 
     def loc_string(self, location):
@@ -85,11 +85,20 @@ class Plugin(plugin.Plugin):
             summaries = []
 
             for day in forecast:
-                from pprint import pprint
-                pprint(day)
+                precip_str = ''
+                qpf_str = ' \x03#:\x03 %s" %s'
+                qpf = day['qpf_allday']['in']
+                snow = day['snow_allday']['in']
+                
+                if qpf > 0:
+                    precip_str = qpf_str % (qpf, 'rain')
+
+                if snow > 0:
+                    precip_str = qpf_str % (snow, 'snow') + precip_str
+
                 summaries.append(self.conditions_str % (
                     day['date']['weekday'].lower(),
-                    day['qpf_allday']['in'],
+                    precip_str,
                     day['high']['fahrenheit'],
                     day['high']['celsius'],
                     day['low']['fahrenheit'],
