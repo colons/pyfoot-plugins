@@ -26,20 +26,23 @@ class Plugin(plugin.Plugin):
         return line
 
     def get_quote(self):
-        ep_index = self.get_wikitext('A_Show_Episode_Guide')
-        eps = ep_index.split('== ... Episodes ..::.. Transcripts ==')[1].split('\n==')[0].split('\n')
-        eps = [e.split('[[')[-1].split('|')[0].replace(' ', '_') for e in eps if len(e) > 0 and e.startswith('# [')]
+        ep_index = self.get_wikitext('A_Show_Episode_Guide').split('=== Notes ===')[0]
+        lines = ep_index.split('\n')
+        eps = [e.split('[[')[-1].split('|')[0].replace(' ', '_') for e in lines if len(e) > 0 and '[[Image:Duckie' in e]
         eps = [e for e in eps if e.startswith('A_show:_')]
 
         ep = choice(eps)
-
+        
+        print(' :: picking from %s' % ep)
         transcript = self.get_wikitext(ep)
 
         epno = int(transcript.split('http://ashow.zefrank.com/episodes/')[1].split(' ')[0])
         source = 'http://ashow.zefrank.com/episodes/%i' % epno
+        
+        # clumsy, but the transcripts are inconsistent
+        transcript = transcript.split('Credits:')[0]
+        transcript = transcript.split('Links from sidebar:')[0]
 
-        transcript = transcript.split('\n(Credits:')[0]
-        transcript = transcript.split('\n(Links from sidebar:')[0]
         try:
             transcript = transcript.split('|next]]')[1]
         except IndexError:
