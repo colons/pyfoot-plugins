@@ -4,7 +4,7 @@ import re
 from random import choice
 import urllib.request, urllib.parse, urllib.error
 from http.server import BaseHTTPRequestHandler
-import chardet
+import chardet2
 import html.entities
 from hurry import filesize
 import time
@@ -179,7 +179,7 @@ class Plugin(plugin.Plugin):
                 # This conditional at least ensures that the charset is checked, even if the result is incorrect.
                 # https://github.com/kennethreitz/requests/issues/592
                 if resource.encoding == 'ISO-8859-1':
-                    resource.encoding = chardet.detect(resource.content)['encoding']
+                    resource.encoding = chardet2.detect(resource.content)['encoding']
                 try:
                     title = re.findall('(?si)(?<=<title).*?>.*?(?=</title>)', resource.text)[0]
                     title = re.sub('.*?>', '', title)
