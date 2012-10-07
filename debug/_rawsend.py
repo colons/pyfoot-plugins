@@ -6,7 +6,7 @@ def send(irc, target, message):
     except KeyError:
         pass
 
-    message = 'PRIVMSG %s :%s\r\n' % (target, message)
+    message = b'PRIVMSG ' + target + b' :' + message + b'\r\n'
     print(' >> %s' % message)
 
     irc.socket.send(message)
