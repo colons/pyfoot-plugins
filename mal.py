@@ -275,7 +275,7 @@ class Plugin(plugin.Plugin):
 
 
     def search(self, message, args):
-        """ $!mal search churuya
+        """ $<comchar>mal search churuya
         >\x02Nyoro-n Churuya-san\x02\x03# :\x03 ONA\x03# |\x03 http://myanimelist.net/anime/5957\x03# |\x03 An anime adaptation of the 4-panel strip manga release: Nyoron Churuya-san. Based on Suzumiya Haruhi's energetic and 'always up to go' character, Tsuruya."""
         query = args['query']
 
