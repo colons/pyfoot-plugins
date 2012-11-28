@@ -18,7 +18,7 @@ class Plugin(plugin.Plugin):
 
         for source in self.conf.conf['rantext_sources']:
             filename = '%s/rantext/%s.txt' % (self.conf.conf['content_dir'], source)
-            file = open(filename)
+            file = open(filename, encoding="utf-8")
             line_list = []
             for line in file:
                 line_list.append(line)

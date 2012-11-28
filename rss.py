@@ -5,6 +5,7 @@ import plugin
 
 defaults = {
         'rss_feeds': {},
+        'rss_interval': 150,
         }
 
 class Plugin(plugin.Plugin):
@@ -24,7 +25,7 @@ class Plugin(plugin.Plugin):
 
     def run(self):
         while True:
-            sleep(150)
+            sleep(self.conf.conf['rss_interval'])
 
             for channel in self.conf.conf['rss_feeds']:
                 url = self.conf.conf['rss_feeds'][channel]

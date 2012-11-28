@@ -116,7 +116,7 @@ class Plugin(plugin.Plugin):
     def summarise(self, message, args):
         """ Summarise a particular user (or yourself).
         $<comchar>mal theshillito
-        >http://myanimelist.net/animelist/\x02theshillito\x02\x03# |\x03 \x0262.17\x02 days across \x02281\x02 shows\x03# |\x03 K-On!: Ura-On!\x03# :\x03 \x027\x02/\x027\x02\x03# :\x03 \x027\x02\x03# |\x03 Ah! My Goddess\x03# :\x03 \x0224\x02/\x0224\x02\x03# :\x03 \x0210\x02\x03# |\x03 Kamen no Maid Guy\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x029\x02\x03# |\x03 Makai Senki Disgaea\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x027\x02\x03# |\x03 K-On!\x03# :\x03 \x0213\x02/\x0213\x02\x03# :\x03 \x029\x02"""
+        >http://myanimelist.net/animelist/\x02theshillito\x02\x03# |\x03 \x0262.17\x02 days across \x02281\x02 keions\x03# |\x03 K-On!: Ura-On!\x03# :\x03 \x027\x02/\x027\x02\x03# :\x03 \x027\x02\x03# |\x03 Ah! My Goddess\x03# :\x03 \x0224\x02/\x0224\x02\x03# :\x03 \x0210\x02\x03# |\x03 Kamen no Maid Guy\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x029\x02\x03# |\x03 Makai Senki Disgaea\x03# :\x03 \x0212\x02/\x0212\x02\x03# :\x03 \x027\x02\x03# |\x03 K-On!\x03# :\x03 \x0213\x02/\x0213\x02\x03# :\x03 \x029\x02"""
         user = self.maluser(args['user'])
 
         try:
@@ -145,11 +145,11 @@ class Plugin(plugin.Plugin):
             showlist_string = ' | %s' % ' | '.join(['%s : \x02%s\x02/\x02%s\x02 : \x02%s\x02' % (a['title'], self.oiz(a['watched_episodes']),
                     self.oiz(a['episodes']), self.oiz(a['score'])) for a in selection])
 
-        summary = 'http://myanimelist.net/animelist/\x02%s\x02 | \x02%s\x02 days across \x02%d\x02 shows%s' % (user, days, len(consumed), showlist_string)
+        summary = 'http://myanimelist.net/animelist/\x02%s\x02 | \x02%s\x02 days across \x02%d\x02 keions%s' % (user, days, len(consumed), showlist_string)
         self.irc.privmsg(message.source, summary, pretty=True)
     
-    def common_shows(self, users):
-        """ Get a list of tuples of shows that any two users have in common """
+    def common_keions(self, users):
+        """ Get a list of tuples of keions that any two users have in common """
         ud_list = []
         for user in users:
             try:
@@ -173,7 +173,7 @@ class Plugin(plugin.Plugin):
 
     def compare(self, message, args):
         users = [self.maluser(u) for u in [args['user1'], args['user2']]]
-        common = self.common_shows(users)
+        common = self.common_keions(users)
         if type(common) == str:
             self.irc.privmsg(message.source, common, pretty=True)
             return
@@ -192,7 +192,7 @@ class Plugin(plugin.Plugin):
         if len(consensus) > 0:
             selection = self.select(consensus)
             self.irc.privmsg(message.source,
-                    '\x02%s\x02 and \x02%s\x02 | \x02%d\x02 common shows | agreement on \x02%d\x02/\x02%d\x02 mutually scored shows | %s' % (
+                    '\x02%s\x02 and \x02%s\x02 | \x02%d\x02 common keions | agreement on \x02%d\x02/\x02%d\x02 mutually scored keions | %s' % (
                     users[0], users[1], len(common), len(consensus), both_scored,
                     ' | '.join(['%s : \x02%d\x02' % (a['title'], a['score']) for a in selection])),
                     pretty=True)
@@ -212,14 +212,14 @@ class Plugin(plugin.Plugin):
                 
             if len(closest) > 0:
                 selection = self.select(closest)
-                self.irc.privmsg(message.source, "\x02%s\x02 and \x02%s\x02 | \x02%d\x02 common shows | %s" % (
+                self.irc.privmsg(message.source, "\x02%s\x02 and \x02%s\x02 | \x02%d\x02 common keions | %s" % (
                         users[0], users[1], len(common),
                         ' | '.join(['%s : \x02%d\x02, \x02%d\x02' % (a[0]['title'], a[0]['score'], a[1]['score']) for a in selection])),
                         pretty=True)
             else:
                 # we have no common ground :<
                 selection = self.select(common)
-                self.irc.privmsg(message.source, "\x02%s\x02 and \x02%s\x02 have \x02%d\x02 shows in common | %s" % (users[0], users[1],
+                self.irc.privmsg(message.source, "\x02%s\x02 and \x02%s\x02 have \x02%d\x02 keions in common | %s" % (users[0], users[1],
                         len(common), ' | '.join([a[0]['title'] for a in selection])),
                         pretty=True)
 
@@ -239,7 +239,7 @@ class Plugin(plugin.Plugin):
 
     def fight(self, message, args):
         users = [self.maluser(u) for u in [args['user1'], args['user2']]]
-        common = self.common_shows(users)
+        common = self.common_keions(users)
         if type(common) == str:
             self.irc.privmsg(message.source, common, pretty=True)
             return
@@ -275,7 +275,7 @@ class Plugin(plugin.Plugin):
 
 
     def search(self, message, args):
-        """ $!mal search churuya
+        """ $<comchar>mal search churuya
         >\x02Nyoro-n Churuya-san\x02\x03# :\x03 ONA\x03# |\x03 http://myanimelist.net/anime/5957\x03# |\x03 An anime adaptation of the 4-panel strip manga release: Nyoron Churuya-san. Based on Suzumiya Haruhi's energetic and 'always up to go' character, Tsuruya."""
         query = args['query']
 
