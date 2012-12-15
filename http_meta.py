@@ -67,7 +67,7 @@ def prettify_url(url):
     if isinstance(url, urllib.parse.ParseResult) == False:
         url = urllib.parse.urlparse(url)
     urlstr = url.hostname + url.path
-    return urlstr if urlstr[-1] != '/' else urlstr[0:-1]
+    return urlstr
 
 class NoTitleError(Exception):
     """ Just a simple, fake, and unique exception to faciliate the main logic. """
