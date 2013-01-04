@@ -14,7 +14,7 @@ def sorted_list_of_crime_types(hood):
 class Plugin(plugin.Plugin):
     """ CHEESE IT, IT'S THE ROZZERS """
     url = 'http://policeapi2.rkh.co.uk/api/%s'
-    help_missing = 'no such %s \x02%s\x02'
+    help_missing = 'no %s found for query \x02%s\x02'
 
     def register_commands(self):
         self.commands = [
@@ -39,9 +39,12 @@ class Plugin(plugin.Plugin):
             if query in hood['name'].lower() or query in hood['id'].lower():
                 filtered_hoods.append(hood)
 
-        self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
-            ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_hoods])
-            )
+        if not filtered_hoods:
+            self.irc.privmsg(message.source, self.help_missing % ('neighbourhoods', query))
+        else:
+            self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
+                ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_hoods])
+                )
             
 
     def forces(self, message, args):
@@ -59,9 +62,12 @@ class Plugin(plugin.Plugin):
             if query in force['id'] or query in force['name'].lower():
                 filtered_forces.append(force)
 
-        self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
-            ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_forces])
-            )
+        if not filtered_forces:
+            self.irc.privmsg(message.source, self.help_missing % ('forces', query))
+        else:
+            self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
+                ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_forces])
+                )
     
     def hood_compare(self, message, args):
         """
