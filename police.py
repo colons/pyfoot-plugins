@@ -6,8 +6,13 @@ import plugin
 from pprint import pprint
 
 def sorted_list_of_crime_types(hood):
-    crime_types = [{'crime_type': t.replace('-', ' '), 'stats': hood[t]} for t in hood.keys() if t != 'all-crime']
+    crime_types = [{
+        'crime_type': t.replace('-', ' '),
+        'stats': hood[t]
+        } for t in hood.keys() if t != 'all-crime']
+
     worst_crime_types = sorted(crime_types, key=lambda t: t['stats']['crime_rate'], reverse=True)
+
     return worst_crime_types 
 
 
