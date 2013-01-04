@@ -12,7 +12,7 @@ class Plugin(plugin.Plugin):
                 ]
 
     def gb(self, message, args):
-        """ Pull a quote from the <a href="http://www.deertier.com/gb/">Giant Bomb Quoter</a> """
+        """ Pull a quote from the <a href="http://www.deertier.com/gb/">Giant Bomb Quoter</a>. """
         lines = request.urlopen('http://www.deertier.com/gb/quotes.js')
         quotes = []
         for line in lines:

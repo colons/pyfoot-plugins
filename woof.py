@@ -1,7 +1,7 @@
 import plugin
 
 defaults = {
-        'woof_trigger': '(?i).*(\\btrench|woo+f|good dog|bad dog|good boy|treat|\\bmeow\\b|\\bbark\\b|\\barf\\b|\\bfetch\\b|\\bmoo+\\b|\\bqua+ck\\b|\\bcluck\\b|\\bwalk\\b|\\bwalkie\\b|\\bwalkies\\b|\\bho+nk\\b|\\bwo+nk\\b|\\bsqua+wk\\b|\\bca+w\\b|\\boink\\b|\\bnya|\\bwan\\b|\\bnyro|\\bgeso|\\bneigh\\b|\\bcollar\\b|\\bawoo+\\b|\\bwan\\b|\\btwee+t\\b).*',
+        'woof_trigger': r'(?i).*(\btrench|woo+f|good dog|bad dog|good boy|treat|\bmeow\b|\bbark\b|\barf\b|\bfetch\b|\bmoo+\b|\bqua+ck\b|\bcluck\b|\bwalk\b|\bwalkie\b|\bwalkies\b|\bho+nk\b|\bwo+nk\b|\bsqua+wk\b|\bca+w\b|\boink\b|\bnya|\bwan\b|\bnyro|\bgeso|\bneigh\b|\bcollar\b|\bawoo+\b|\bwan\b|\btwee+t\b).*',
         'woof_greeting': 'woof',
         }
 
