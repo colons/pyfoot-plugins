@@ -30,8 +30,8 @@ class Plugin(plugin.Plugin):
 
     def register_commands(self):
         self.commands = [
-                ('crime compare <<location_a>> vs <<location_b>>', self.hood_compare),
                 ('crime summary <<location>>', self.hood_summary),
+                ('crime compare <<location_a>> vs <<location_b>>', self.hood_compare),
             ]
 
 
@@ -73,7 +73,7 @@ class Plugin(plugin.Plugin):
         """
         Summarise crime data in a given location.
         $<comchar>crime leicester
-        >\x02Leicester, UK\x02 \x02#|\x02 crime rate: \x024.53\x02 (average) \x03#|\x03 burglary \x03#:\x03 \x020.87\x02 \x03#|\x03 anti social behaviour \x03#:\x03 \x020.72\x02 \x03#|\x03 vehicle crime \x03#:\x03 \x020.58\x02 \x03#|\x03 criminal damage arson \x03#:\x03 \x020.58\x02 \x03#|\x03 violent crime \x03#:\x03 \x020.43\x02
+        >\x02Leicester, UK\x02 \x03#|\x03 crime rate: \x024.53\x02 (average) \x03#|\x03 burglary \x03#:\x03 \x020.87\x02 \x03#|\x03 anti social behaviour \x03#:\x03 \x020.72\x02 \x03#|\x03 vehicle crime \x03#:\x03 \x020.58\x02 \x03#|\x03 criminal damage arson \x03#:\x03 \x020.58\x02 \x03#|\x03 violent crime \x03#:\x03 \x020.43\x02
         """
         
         location = self.attempt_to_get_one_location(message, args['location'])
