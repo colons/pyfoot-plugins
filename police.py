@@ -115,6 +115,7 @@ class Plugin(plugin.Plugin):
         """
         Compare two neighbourhoods.
         $<comchar>cr leicester vs london 
+        >\x02Leicester, UK\x02 vs. \x02London, UK\x02 \x03#|\x03 crime rate \x03#:\x03 \x0217.61\x02 (above average) vs. \x02207.71\x02 (high) \x03#|\x03 commonest crime \x03#:\x03 \x02anti social behaviour\x02 (3.54) vs. \x02other theft\x02 (92.56) \x03#|\x03 rarest crime \x03#:\x03 \x02robbery\x02 (0.00) vs. \x02vehicle crime\x02 (1.33)
         """ 
         hood_a = {'query': args['location_a']}
         hood_b = {'query': args['location_b']}
