@@ -15,86 +15,139 @@ def sorted_list_of_crime_types(hood):
 
     return worst_crime_types 
 
+def geocode(query):
+    url = 'http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false' % urllib.parse.quote(query)
+    print(' -- '+url)
+    raw_data = urllib.request.urlopen(url).read().decode('utf-8')
+    data = json.loads(raw_data)
+    return data
+
 
 class Plugin(plugin.Plugin):
-    """ CHEESE IT, IT'S THE ROZZERS """
+    """ CHEESE IT, IT'S THE <a href="http://police.uk/">ROZZERS</a> """
     url = 'http://policeapi2.rkh.co.uk/api/%s'
     help_missing = 'no %s found for query \x02%s\x02'
 
     def register_commands(self):
         self.commands = [
-                ('crime forces <query>', self.forces),
-                ('crime neighbourhoods <force> <query>', self.neighbourhoods),
-                ('crime summary <force> <neighbourhood>', self.hood_summary),
-                ('crime compare <force_a> <neighbourhood_a> <force_b> <neighbourhood_b>', self.hood_compare),
+                ('crime compare <<location_a>> vs <<location_b>>', self.hood_compare),
+                ('crime summary <<location>>', self.hood_summary),
             ]
 
-    def neighbourhoods(self, message, args):
-        """ List the neighbourhoods in a given force matching a string
-        $<comchar>cri nei leicestershire br
-        >\x02C05\x02 (Braunstone Park and Rowley Fields) \x03#:\x03 \x02L51\x02 (Thorpe Astley and Braunstone Town) \x03#:\x03 \x02L64\x02 (Broughton Astley and Walton)
-        """ 
 
-        query = args['query'].lower()
+    def attempt_to_get_one_location(self, message, query):
+        data = geocode(query)
+        results = data['results']
 
-        hoods = self.query(args['force'], 'neighbourhoods')
-        pprint(hoods)
-        filtered_hoods = []
-        for hood in hoods:
-            if query in hood['name'].lower() or query in hood['id'].lower():
-                filtered_hoods.append(hood)
+        if len(results) == 1:
+            return (results[0]['formatted_address'],
+                    results[0]['geometry']['location'])
 
-        if not filtered_hoods:
-            self.irc.privmsg(message.source, self.help_missing % ('neighbourhoods', query))
-        else:
-            self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
-                ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_hoods])
-                )
-            
+        elif len(results) == 0:
+            self.irc.privmsg(message.source, self.help_missing % ('location', query))
+            return None
 
-    def forces(self, message, args):
+        elif len(results) > 1:
+            self.irc.privmsg(
+                    message.source,
+                    '\x02did you mean\x02 \x03#|\x03 ' + ' \x03#:\x03 '.join([r['formatted_address'] for r in results])
+                    )
+            return None
+
+    def attempt_to_get_neighbourhood(self, message, latlng):
+        try:
+            data = self.query('locate-neighbourhood?q=%s,%s' % (latlng['lat'], latlng['lng']))
+        except urllib.error.HTTPError:
+            self.irc.privmsg(message.source, 'no police found for %s' % name)
+            return None
+    
+        return data
+    
+    def hood(self, geocoded):
+        crimes = self.query(geocoded['force'], geocoded['neighbourhood'], 'crime')['crimes']
+        date = list(crimes.keys())[0]
+        hood = crimes[date]
+        return hood
+
+    def hood_summary(self, message, args):
         """
-        Search for a force by a particular string.
-        $<comchar>crime forces le
-        >\x02cleveland\x02 (Cleveland Police) \x03#:\x03 \x02leicestershire\x02 (Leicestershire Police) \x03#:\x03 \x02north-wales\x02 (North Wales Police) \x03#:\x03 \x02south-wales\x02 (South Wales Police) \x03#:\x03 \x02thames-valley\x02 (Thames Valley Police)
+        Summarise crime data in a given location.
+        $<comchar>crime leicester
+        >\x02Leicester, UK\x02 \x02#|\x02 crime rate: \x024.53\x02 (average) \x03#|\x03 burglary \x03#:\x03 \x020.87\x02 \x03#|\x03 anti social behaviour \x03#:\x03 \x020.72\x02 \x03#|\x03 vehicle crime \x03#:\x03 \x020.58\x02 \x03#|\x03 criminal damage arson \x03#:\x03 \x020.58\x02 \x03#|\x03 violent crime \x03#:\x03 \x020.43\x02
         """
-        forces = self.query('forces')
-        query = args['query'].lower()
+        
+        location = self.attempt_to_get_one_location(message, args['location'])
 
-        filtered_forces = []
-
-        for force in forces:
-            if query in force['id'] or query in force['name'].lower():
-                filtered_forces.append(force)
-
-        if not filtered_forces:
-            self.irc.privmsg(message.source, self.help_missing % ('forces', query))
+        if location:
+            name, latlng = location
+            print(name)
+            print(latlng)
         else:
-            self.irc.privmsg(message.source, ' \x03#:\x03 '.join(
-                ['\x02%s\x02 (%s)' % (f['id'], f['name']) for f in filtered_forces])
+            # we didn't get a fix, abandon hope
+            return
+
+        hood_response = self.attempt_to_get_neighbourhood(message, latlng)
+
+        if not hood_response:
+            return
+
+        hood = self.hood(hood_response)
+
+        if message:
+            worst_crime_types = sorted_list_of_crime_types(hood)
+            self.irc.privmsg(message.source,
+                '\x02%s\x02 \x03#|\x03 crime rate: \x02%s\x02 (%s) \x03#|\x03 ' % (
+                    name,
+                    hood['all-crime']['crime_rate'],
+                    hood['all-crime']['crime_level'].replace('_', ' '),
+                    ) + ' \x03#|\x03 '.join([
+                        '%s \x03#:\x03 \x02%s\x02' % (
+                            t['crime_type'],
+                            t['stats']['crime_rate'],
+                            ) for t in worst_crime_types[:5]
+                        ])
                 )
+        else:
+            return hood
+
     
     def hood_compare(self, message, args):
         """
         Compare two neighbourhoods.
-        $<comchar>cr c leicestershire C04 city-of-london cs 
+        $<comchar>cr leicester vs london 
         """ 
-        hood_a = {'force': args['force_a'], 'neighbourhood': args['neighbourhood_a']}
-        hood_b = {'force': args['force_b'], 'neighbourhood': args['neighbourhood_b']}
+        hood_a = {'query': args['location_a']}
+        hood_b = {'query': args['location_b']}
 
         for hood in (hood_a, hood_b):
-            hood_api = self.hood_summary(False, {'force': hood['force'], 'neighbourhood': hood['neighbourhood']})
+            location = self.attempt_to_get_one_location(message, hood['query'])
+
+            if location:
+                name, latlng = location
+            else:
+                return
+
+            hood_response = self.attempt_to_get_neighbourhood(message, latlng)
+
+            if not hood_response:
+                return
+
+            hood_api = self.hood({
+                'force': hood_response['force'],
+                'neighbourhood': hood_response['neighbourhood']
+                })
             hood['worst'] = sorted_list_of_crime_types(hood_api)
             hood['api'] = hood_api
+            hood['name'] = name 
         
         strings = [
             '\x02%s\x02 vs. \x02%s\x02' % (
-                hood_a['neighbourhood'], hood_b['neighbourhood']
+                hood_a['name'], hood_b['name']
                 ),
 
             'crime rate \x03#:\x03 \x02%s\x02 (%s) vs. \x02%s\x02 (%s)' % (
-                hood_a['api']['all-crime']['crime_rate'], hood_a['api']['all-crime']['crime_level'], 
-                hood_b['api']['all-crime']['crime_rate'], hood_b['api']['all-crime']['crime_level'],
+                hood_a['api']['all-crime']['crime_rate'], hood_a['api']['all-crime']['crime_level'].replace('_', ' '), 
+                hood_b['api']['all-crime']['crime_rate'], hood_b['api']['all-crime']['crime_level'].replace('_', ' '),
                 ),
 
             'commonest crime \x03#:\x03 \x02%s\x02 (%s) vs. \x02%s\x02 (%s)' % (
@@ -111,36 +164,6 @@ class Plugin(plugin.Plugin):
 
         self.irc.privmsg(message.source, ' \x03#|\x03 '.join(strings))
 
-    def hood_summary(self, message, args):
-        """
-        Summarise crime data in a given location.
-        $<comchar>crime summary leicestershire L55
-        >Crime rate: \x024.53\x02 (average) \x03#|\x03 burglary \x03#:\x03 \x020.87\x02 \x03#|\x03 anti social behaviour \x03#:\x03 \x020.72\x02 \x03#|\x03 vehicle crime \x03#:\x03 \x020.58\x02 \x03#|\x03 criminal damage arson \x03#:\x03 \x020.58\x02 \x03#|\x03 violent crime \x03#:\x03 \x020.43\x02
-        """
-        crimes = self.query(args['force'], args['neighbourhood'], 'crime')['crimes']
-        #self.irc.privmsg(message.source, summary, pretty=True)
-        date = list(crimes.keys())[0]
-
-        hood = crimes[date]
-
-
-        if message:
-            worst_crime_types = sorted_list_of_crime_types(hood)
-            self.irc.privmsg(message.source,
-                'Crime rate: \x02%s\x02 (%s) \x03#|\x03 ' % (
-                    hood['all-crime']['crime_rate'],
-                    hood['all-crime']['crime_level'].replace('_', ' '),
-                    ) + ' \x03#|\x03 '.join([
-                        '%s \x03#:\x03 \x02%s\x02' % (
-                            t['crime_type'],
-                            t['stats']['crime_rate'],
-                            ) for t in worst_crime_types[:5]
-                        ])
-                )
-        else:
-            return hood
-
-    
 
     def query(self, *args):
         url = self.url % '/'.join(args)
