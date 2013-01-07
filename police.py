@@ -54,11 +54,11 @@ class Plugin(plugin.Plugin):
                     )
             return None
 
-    def attempt_to_get_neighbourhood(self, message, latlng):
+    def attempt_to_get_neighbourhood(self, message, latlng, name):
         try:
             data = self.query('locate-neighbourhood?q=%s,%s' % (latlng['lat'], latlng['lng']))
         except urllib.error.HTTPError:
-            self.irc.privmsg(message.source, 'no police found for %s' % name)
+            self.irc.privmsg(message.source, 'no police found for \x02%s\x02' % name)
             return None
     
         return data
@@ -86,7 +86,7 @@ class Plugin(plugin.Plugin):
             # we didn't get a fix, abandon hope
             return
 
-        hood_response = self.attempt_to_get_neighbourhood(message, latlng)
+        hood_response = self.attempt_to_get_neighbourhood(message, latlng, name)
 
         if not hood_response:
             return
@@ -127,7 +127,7 @@ class Plugin(plugin.Plugin):
             else:
                 return
 
-            hood_response = self.attempt_to_get_neighbourhood(message, latlng)
+            hood_response = self.attempt_to_get_neighbourhood(message, latlng, name)
 
             if not hood_response:
                 return
