@@ -4,12 +4,18 @@ import feedparser
 import plugin
 
 defaults = {
-        'rss_feeds': {},
-        'rss_interval': 150,
-        }
+    'rss_feeds': {},
+    'rss_interval': 150,
+}
+
 
 class Plugin(plugin.Plugin):
-    """<pyfoot> is capable of reading an RSS feed into a channel, but it's not configurable live. Talk to whoever is operating your local pyfoot instance if you have a feed you'd like in a channel."""
+    """
+    <pyfoot> is capable of reading an RSS feed into a channel, but it's not
+    configurable live. Talk to whoever is operating your local pyfoot instance
+    if you have a feed you'd like in a channel.
+    """
+
     def prepare(self):
         self.latestitem = {}
 
@@ -33,7 +39,7 @@ class Plugin(plugin.Plugin):
                 for url in urls:
                     try:
                         feed = feedparser.parse(url)
-                        item = feed['items'][0] 
+                        item = feed['items'][0]
                     except:
                         pass
                     else:
@@ -41,5 +47,6 @@ class Plugin(plugin.Plugin):
                             self.latestitem[url] = feed['items'][0]
                             title = self.latestitem[url]['title']
                             link = self.latestitem[url]['link']
-                        
-                            self.irc.privmsg(channel, '%s | %s' % (title, link), pretty=True)
+
+                            self.irc.privmsg(channel, '%s | %s' % (
+                                title, link), pretty=True)
