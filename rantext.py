@@ -1,23 +1,27 @@
 from random import choice
-from copy import copy
 
 import plugin
 
 
 defaults = {
-        'rantext_sources': [],
-        'rantext_frames': {},
-        }
+    'rantext_sources': [],
+    'rantext_frames': {},
+}
+
 
 class Plugin(plugin.Plugin):
-    """ Retrieve a random line from a text file. Can be directed at individuals. """
+    """
+    Retrieve a random line from a text file. Can be directed at individuals.
+    """
+
     def register_commands(self):
         self.commands = []
 
         self.sources = {}
 
         for source in self.conf.conf['rantext_sources']:
-            filename = '%s/rantext/%s.txt' % (self.conf.conf['content_dir'], source)
+            filename = '%s/rantext/%s.txt' % (self.conf.conf['content_dir'],
+                                              source)
             file = open(filename, encoding="utf-8")
             line_list = []
             for line in file:

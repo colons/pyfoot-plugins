@@ -13,8 +13,8 @@ defaults = {
 class Plugin(plugin.Plugin):
     """
     A plugin that keeps channels updated with the currently playing track on
-    <a href="http://thisisthecat.com/index.php/neko-desu">Neko Desu</a>
-    according to the <a href="http://nkd.su/help/api">nkd.su api</a>.
+    [Neko Desu](http://thisisthecat.com/index.php/neko-desu) according to the
+    [nkd.su API](http://nkd.su/help/api).
     """
 
     url = 'http://nkd.su/api'

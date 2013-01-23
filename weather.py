@@ -1,13 +1,15 @@
 import plugin
-import urllib.request, urllib.error, urllib.parse
-from urllib.parse import quote 
+import urllib.request
+import urllib.error
+import urllib.parse
+from urllib.parse import quote
 import json
 
 defaults = {
-        'wunderground_key': '',
-        'forecasts_per_message': 3,
-        'days_ahead': 6,
-        }
+    'wunderground_key': '',
+    'forecasts_per_message': 3,
+    'days_ahead': 6,
+}
 
 
 def f_to_c(f):
@@ -21,18 +23,35 @@ class Plugin(plugin.Plugin):
                          ('weather today <<location>>', self.today)]
 
     def prepare(self):
-        self.url = "http://api.wunderground.com/api/" + self.conf.conf['wunderground_key'] + "/%s/q/%s.json"
+        self.url = (
+            "http://api.wunderground.com/api/"
+            + self.conf.conf['wunderground_key'] + "/%s/q/%s.json")
 
-        self.current_msg = "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph"
+        self.current_msg = (
+            "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 "
+            "humidity \x03#:\x03 %s \x03#|\x03 wind \x03#:\x03 %s at %s mph")
+
         self.suggestions_msg = "\x02matches\x02 \x03#|\x03 %s"
-        self.conditions_str = '\x02%s\x02 \x03#:\x03 %s%s \x03#:\x03 high %s\u00b0F %s\u00b0C \x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:\x03 %s at %s mph'
+
+        self.conditions_str = (
+            '\x02%s\x02 \x03#:\x03 %s%s \x03#:\x03 high %s\u00b0F %s\u00b0C '
+            '\x03#:\x03 low %s\u00b0F %s\u00b0C \x03#:\x03 %s%% humid \x03#:'
+            '\x03 %s at %s mph')
+
         # self.conditions_str = "%s \x03#:\x03 %s"
 
     def loc_string(self, location):
-        """ Creates a human-readable location string based on a wunderground result """
-        if 'full' in location: return location['full']
+        """
+        Creates a human-readable location string based on a wunderground
+        results.
+        """
 
-        return ', '.join([location[size] for size in ['name', 'state', 'country'] if location[size] != ''])
+        if 'full' in location:
+            return location['full']
+
+        return ', '.join([
+            location[size] for size in ['name', 'state', 'country']
+            if location[size] != ''])
 
     def suggest(self, data):
         results = data['response']['results']
@@ -42,10 +61,16 @@ class Plugin(plugin.Plugin):
         return msg
 
     def current(self, message, args):
-        """ Fetches the current weather in <span class="irc"><span class="repl">location</span></span>.
-        $<comchar>w c stafford, uk
-        >\x02Stafford, Staffordshire\x02 \x03#|\x03 61\u00b0F \x03#:\x03 16\u00b0C \x03#|\x03 humidity \x03#:\x03 68% \x03#|\x03 wind \x03#:\x03 W at 9 mph
         """
+        Fetches the current weather in `<location>`.
+
+        $<comchar>w c stafford, uk
+
+        >\x02Stafford, Staffordshire\x02 \x03#|\x03 61\u00b0F \x03#:\x03
+        16\u00b0C \x03#|\x03 humidity \x03#:\x03 68% \x03#|\x03 wind
+        \x03#:\x03 W at 9 mph
+        """
+
         url = self.url % ('conditions', quote(args["location"]))
         print(url)
         data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
@@ -63,20 +88,31 @@ class Plugin(plugin.Plugin):
             wind_mph = conditions['wind_mph']
             wind_dir = conditions['wind_dir'].lower()
 
-            msg = self.current_msg % (city, tempf, tempc, humidity, wind_dir, wind_mph)
+            msg = self.current_msg % (
+                city, tempf, tempc, humidity, wind_dir, wind_mph)
 
         self.irc.privmsg(message.source, msg)
 
     def forecast(self, message, args):
-        """ Fetches the weather forecast for <span class="irc"><span class="repl">location</span></span>.
+        """
+        Fetches the weather forecast for `<location>`.
+
         $<comchar>w f nantwich and crewe
-        >\x02Crewe, Cheshire East\x02 \x03#|\x03 \x02mon\x02 \x03#:\x03 high 70\u00b0F 21\u00b0C \x03#:\x03 low 48\u00b0F 8\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02tue\x02 \x03#:\x03 high 75\u00b0F 23\u00b0C \x03#:\x03 low 50\u00b0F 10\u00b0C \x03#:\x03 clear \x03#|\x03 \x02wed\x02 \x03#:\x03 high 82\u00b0F 27\u00b0C \x03#:\x03 low 59\u00b0F 15\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02thu\x02 \x03#:\x03 high 77\u00b0F 25\u00b0C \x03#:\x03 low 52\u00b0F 11\u00b0C \x03#:\x03 cloudy
+
+        >\x02Crewe, Cheshire East\x02 \x03#|\x03 \x02mon\x02 \x03#:\x03 high
+        70\u00b0F 21\u00b0C \x03#:\x03 low 48\u00b0F 8\u00b0C \x03#:\x03 partly
+        sunny \x03#|\x03 \x02tue\x02 \x03#:\x03 high 75\u00b0F 23\u00b0C
+        \x03#:\x03 low 50\u00b0F 10\u00b0C \x03#:\x03 clear \x03#|\x03
+        \x02wed\x02 \x03#:\x03 high 82\u00b0F 27\u00b0C \x03#:\x03 low
+        59\u00b0F 15\u00b0C \x03#:\x03 partly sunny \x03#|\x03 \x02thu\x02
+        \x03#:\x03 high 77\u00b0F 25\u00b0C \x03#:\x03 low 52\u00b0F 11\u00b0C
+        \x03#:\x03 cloudy
         """
 
         url = self.url % ('forecast10day', quote(args["location"]))
         print(url)
         data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
-        
+
         if 'results' in data['response']:
             msg = self.suggest(data)
             self.irc.privmsg(message.source, msg)
@@ -90,7 +126,7 @@ class Plugin(plugin.Plugin):
                 qpf_str = ' \x03#:\x03 %s" %s'
                 qpf = day['qpf_allday']['in']
                 snow = day['snow_allday']['in']
-                
+
                 if qpf > 0:
                     precip_str = qpf_str % (qpf, 'rain')
 
@@ -108,15 +144,16 @@ class Plugin(plugin.Plugin):
                     day['avehumidity'],
                     day['avewind']['dir'].lower(),
                     day['avewind']['mph']
-                    ))
-                
+                ))
+
             if 'today' in args:
                 summaries = summaries[:1]
             else:
                 summaries = summaries[:self.conf.conf['days_ahead']]
 
             while summaries:
-                msg = ' \x03#|\x03 '.join(summaries[0:self.conf.conf['forecasts_per_message']])
+                msg = ' \x03#|\x03 '.join(
+                    summaries[0:self.conf.conf['forecasts_per_message']])
                 summaries = summaries[self.conf.conf['forecasts_per_message']:]
                 self.irc.privmsg(message.source, msg)
 

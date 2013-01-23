@@ -126,8 +126,11 @@ class Plugin(plugin.Plugin):
         return urls
 
     def httpmeta(self, message, args):
-        """$https://twitter.com/#!/camh/statuses/147449116551680001
-        >Twitter / Cameron Kenley Hunt: There are only three hard  ... \x03#|\x03 \x02twitter.com\x02
+        """
+        $https://twitter.com/#!/camh/statuses/147449116551680001
+
+        >Twitter / Cameron Kenley Hunt: There are only three hard  ...
+        >\x03#|\x03 \x02twitter.com\x02
         """
         #<strong>generic:</strong> For HTML documents, the <span class="repl">title</span> element; for all other links, the MIME type and file size.
         #<strong>imgur:</strong> Returns the title (if available) and file size of images posted on Imgur.
