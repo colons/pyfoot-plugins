@@ -12,9 +12,9 @@ defaults = {
 
 class Plugin(plugin.Plugin):
     """
-    <pyfoot> is capable of reading an RSS feed into a channel, but it's not
-    configurable live. Talk to whoever is operating your local pyfoot instance
-    if you have a feed you'd like in a channel.
+    A plugin that keeps channels updated with the currently playing track on
+    <a href="http://thisisthecat.com/index.php/neko-desu">Neko Desu</a>
+    according to the <a href="http://nkd.su/help/api">nkd.su api</a>.
     """
 
     url = 'http://nkd.su/api'
