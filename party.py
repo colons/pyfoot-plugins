@@ -82,12 +82,18 @@ class Plugin(plugin.Plugin):
         file.close()
 
         attempts = int((len(party)-1)/2)
-        self.irc.privmsg(
+
+        self.send_struc(
             message.source,
-            '%s | \x02%i\x02 attempts | %s/party/%s/%s/' % (
-                party[-1], attempts, self.conf.conf['web_url'],
-                self.conf.alias, filename),
-            pretty=True)
+            [
+                party[-1],
+
+                '\x02%i\x02 attempts' % attempts,
+
+                self.shorten_url('%s/party/%s/%s/' % (
+                    self.conf.conf['web_url'],
+                    self.conf.alias, filename)),
+            ])
 
     def partyvia(self, message, args):
         """
