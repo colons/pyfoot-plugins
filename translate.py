@@ -46,7 +46,7 @@ class Plugin(plugin.Plugin):
     def translate(self, message, args):
         """
         Translates `<phrase>` from `<from>` to `<to>` using the Bing translate
-        API. `<from>` and `to` must be any of the language codes listed
+        API. `<from>` and `<to>` must be any of the language codes listed
         [here](http://msdn.microsoft.com/en-us/library/hh456380.aspx).
 
         $<comchar>translate fr en le jambon est mort

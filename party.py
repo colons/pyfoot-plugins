@@ -91,7 +91,7 @@ class Plugin(plugin.Plugin):
 
     def partyvia(self, message, args):
         """
-        Specify a language code, for your party. `<via>` must be a code from
+        Specify a language code for your party. `<via>` must be a code from
         [here](http://msdn.microsoft.com/en-us/library/hh456380.aspx).
         """
 
