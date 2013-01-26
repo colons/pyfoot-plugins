@@ -58,6 +58,6 @@ class Plugin(plugin.Plugin):
 
             if np and np['id'] != self.latest_play:
                 self.notify_our_channels(np)
-                self.latest_play == np['id']
+                self.latest_play = np['id']
             elif (not np) and (self.latest_play is not None):
                 self.latest_play = None
