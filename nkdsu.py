@@ -17,7 +17,7 @@ class Plugin(plugin.Plugin):
     [nkd.su API](http://nkd.su/help/api).
     """
 
-    url = 'http://nkd.su/api'
+    url = 'http://nkd.su/api/'
     np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s\x03# :\x03 %s'
     unroled_np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s'
 
