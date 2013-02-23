@@ -18,8 +18,8 @@ class Plugin(plugin.Plugin):
     """
 
     url = 'http://nkd.su/api/'
-    np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s\x03# :\x03 %s'
-    unroled_np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s'
+    np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s\x03# :\x03 %s\x03# |\x03 %s'
+    unroled_np_str = 'now playing\x03# |\x03 \x02%s\x02\x03# :\x03 %s\x03# |\x03 %s'
 
     def prepare(self):
         np = self.now_playing()
@@ -43,10 +43,10 @@ class Plugin(plugin.Plugin):
     def notify_our_channels(self, np):
         if np['role']:
             np_str = self.np_str % (
-                np['title'], np['role'], np['artist'])
+                np['title'], np['role'], np['artist'], self.shorten_url(np['url']))
         else:
             np_str = self.unroled_np_str % (
-                np['title'], np['artist'])
+                np['title'], np['artist'], self.shorten_url(np['url']))
 
         for channel in self.conf.conf['nkdsu_np_channels']:
             self.irc.privmsg(channel, np_str)
