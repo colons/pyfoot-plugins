@@ -35,9 +35,10 @@ class Plugin(plugin.Plugin):
 
             for pod in tree.findall('pod'):
                 if (pod.attrib.get('primary', None) == 'true'
-                        or pod.attrib.get('title', None) == 'Results'):
+                        or (pod.attrib.get('title', None) == 'Results')):
                     result = pod.find('subpod').find('plaintext').text
-                    results.append([r.strip() for r in result.split(' | ')])
+                    if result:
+                        results.append([r.strip() for r in result.split(' | ')])
 
                 elif pod.attrib['title'] == 'Input interpretation':
                     interp = pod.find('subpod').find('plaintext').text
