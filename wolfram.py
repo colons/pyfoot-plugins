@@ -34,7 +34,8 @@ class Plugin(plugin.Plugin):
             results = []
 
             for pod in tree.findall('pod'):
-                if pod.attrib.get('primary', None) == 'true':
+                if (pod.attrib.get('primary', None) == 'true'
+                        or pod.attrib.get('title', None) == 'Results'):
                     result = pod.find('subpod').find('plaintext').text
                     results.append([r.strip() for r in result.split(' | ')])
 
