@@ -54,16 +54,25 @@ class Plugin(plugin.Plugin):
             self.irc.privmsg(message.source, self.err % msg)
 
         else:
-            self.send_struc(
-                message.source,
-                [
-                    '\x02did you mean\x02',
+            for a, b in [('didyoumeans', 'didyoumean'), ('tips', 'tip')]:
+                if tree.find(a):
+                    elements = tree.find(a).findall(b)
 
-                    [d.text for d in
-                     tree.find('didyoumeans').findall('didyoumean')],
+                    if b == 'tip':
+                        texts = [e.attrib['text'] for e in elements]
+                    else:
+                        texts = [e.text for e in elements]
 
-                    self.shorten_url(self.human_url % quote(args['query'])),
-                ])
+                    self.send_struc(
+                        message.source,
+                        [
+                            '\x02sorry about this\x02',
+                            texts,
+                            self.shorten_url(self.human_url % quote(args['query'])),
+                        ])
+
+                    return
+            raise
 
     def query(self, query):
         url = self.url % (quote(query), self.conf.get('wolfram_app_id'))
