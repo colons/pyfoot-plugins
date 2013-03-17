@@ -48,12 +48,12 @@ class Plugin(plugin.Plugin):
             np_str = self.unroled_np_str % (
                 np['title'], np['artist'], self.shorten_url(np['url']))
 
-        for channel in self.conf.conf['nkdsu_np_channels']:
+        for channel in self.conf['nkdsu_np_channels']:
             self.irc.privmsg(channel, np_str)
 
     def run(self):
         while True:
-            sleep(self.conf.conf['nkdsu_interval'])
+            sleep(self.conf['nkdsu_interval'])
             np = self.now_playing()
 
             if np and np['id'] != self.latest_play:

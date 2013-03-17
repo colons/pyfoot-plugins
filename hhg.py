@@ -29,7 +29,7 @@ class Plugin(plugin.Plugin):
 
         character = args['character']
 
-        hhg = open(path.expanduser(self.conf.conf['content_dir']+'hhg.txt'))
+        hhg = open(path.expanduser(self.conf['content_dir']+'hhg.txt'))
         linelist = []
 
         character = character.strip()

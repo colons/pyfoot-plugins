@@ -25,7 +25,7 @@ class Plugin(plugin.Plugin):
     def prepare(self):
         self.url = (
             "http://api.wunderground.com/api/"
-            + self.conf.conf['wunderground_key'] + "/%s/q/%s.json")
+            + self.conf['wunderground_key'] + "/%s/q/%s.json")
 
         self.current_msg = (
             "\x02%s\x02 \x03#|\x03 %s\u00b0F \x03#:\x03 %s\u00b0C \x03#|\x03 "
@@ -149,12 +149,12 @@ class Plugin(plugin.Plugin):
             if 'today' in args:
                 summaries = summaries[:1]
             else:
-                summaries = summaries[:self.conf.conf['days_ahead']]
+                summaries = summaries[:self.conf['days_ahead']]
 
             while summaries:
                 msg = ' \x03#|\x03 '.join(
-                    summaries[0:self.conf.conf['forecasts_per_message']])
-                summaries = summaries[self.conf.conf['forecasts_per_message']:]
+                    summaries[0:self.conf['forecasts_per_message']])
+                summaries = summaries[self.conf['forecasts_per_message']:]
                 self.irc.privmsg(message.source, msg)
 
     def today(self, message, args):

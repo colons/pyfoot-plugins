@@ -19,8 +19,8 @@ class Plugin(plugin.Plugin):
 
         self.sources = {}
 
-        for source in self.conf.conf['rantext_sources']:
-            filename = '%s/rantext/%s.txt' % (self.conf.conf['content_dir'],
+        for source in self.conf['rantext_sources']:
+            filename = '%s/rantext/%s.txt' % (self.conf['content_dir'],
                                               source)
             file = open(filename, encoding="utf-8")
             line_list = []
@@ -42,8 +42,8 @@ class Plugin(plugin.Plugin):
         source = self.sources[sourcename]
         line = choice(source)
 
-        if sourcename in self.conf.conf['rantext_frames']:
-            line = self.conf.conf['rantext_frames'][sourcename] % line
+        if sourcename in self.conf['rantext_frames']:
+            line = self.conf['rantext_frames'][sourcename] % line
 
         if 'nick' in args:
             line = '%s: %s' % (args['nick'], line)

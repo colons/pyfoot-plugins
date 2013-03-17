@@ -15,7 +15,7 @@ defaults = {
 class Plugin(plugin.Plugin):
     def register_commands(self):
         self.regexes = [
-            (self.conf.conf['woof_trigger'], self.woof),
+            (self.conf['woof_trigger'], self.woof),
         ]
 
     def woof(self, message, args):
@@ -28,4 +28,4 @@ class Plugin(plugin.Plugin):
         >woof
         """
 
-        self.irc.privmsg(message.source, self.conf.conf['woof_greeting'])
+        self.irc.privmsg(message.source, self.conf['woof_greeting'])

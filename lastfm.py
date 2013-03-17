@@ -25,11 +25,11 @@ class Plugin(plugin.Plugin):
 
         self.default_args = {
             'format': 'json',
-            'api_key': self.conf.conf['lastfm_api_key']
+            'api_key': self.conf['lastfm_api_key']
         }
 
         self.user_file_path = path.expanduser(
-            self.conf.conf['content_dir']+'lastfm')
+            self.conf['content_dir']+'lastfm')
         self.lastfmusers = {}
         self.help_missing = 'no such Last.fm user \x02%s\x02'
 

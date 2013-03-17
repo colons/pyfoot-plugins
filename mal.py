@@ -32,11 +32,11 @@ class Plugin(plugin.Plugin):
         self.url = 'http://mal-api.com/%s?%s'
         self.default_args = ['format=json']
         self.user_file_path = path.expanduser(
-            self.conf.conf['content_dir']+'mal')
+            self.conf['content_dir']+'mal')
         self.malusers = {}
         self.help_setup = (
             "link a MyAnimeList account to your IRC nick with '" +
-            self.conf.conf['comchar']+"mal set <account name>'"
+            self.conf['comchar']+"mal set <account name>'"
         )
         self.help_missing = 'no such MAL user \x02%s\x02'
 

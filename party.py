@@ -26,11 +26,11 @@ def dupes(party):
 
 class Plugin(plugin.Plugin):
     def prepare(self):
-        self.translator = Translator(self.conf.conf['bing_app_id'])
+        self.translator = Translator(self.conf['bing_app_id'])
 
     def register_commands(self):
         self.party_path = path.expanduser(
-            self.conf.conf['party_dir']+'/'+self.conf.alias+'/')
+            self.conf['party_dir']+'/'+self.conf.alias+'/')
 
         self.commands = [
             ('party <<phrase>>', self.party),
@@ -57,7 +57,7 @@ class Plugin(plugin.Plugin):
         try:
             transvia = args['lang']
         except KeyError:
-            transvia = self.conf.conf['party_via']
+            transvia = self.conf['party_via']
 
         party = [args['phrase']]
         while not dupes(party):
@@ -91,7 +91,7 @@ class Plugin(plugin.Plugin):
                 '\x02%i\x02 attempts' % attempts,
 
                 self.shorten_url('%s/party/%s/%s/' % (
-                    self.conf.conf['web_url'],
+                    self.conf['web_url'],
                     self.conf.alias, filename)),
             ])
 
