@@ -1,4 +1,4 @@
 requests
-chardet
+chardet2
 hurry.filesize
 feedparser
