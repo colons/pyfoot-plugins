@@ -127,7 +127,7 @@ class Plugin(plugin.Plugin):
         return selection
 
     def oiz(self, thing):
-        """ Pipe user ratings through this. """
+        """ Pipe user ratings and episode counts through this. """
         if thing == 0:
             return '-'
         else:
@@ -420,6 +420,10 @@ class Plugin(plugin.Plugin):
         })
 
     def watching(self, message, args):
+        """
+        Find out what a person (or yourself) is watching.
+        """
+
         user = self.maluser(args['user'])
 
         try:
@@ -431,7 +435,8 @@ class Plugin(plugin.Plugin):
             return
 
         watching = [(a['title'],
-                     '%i/%i' % (a['watched_episodes'], a['episodes']))
+                     '%i/%i' % (a['watched_episodes'],
+                                self.oiz(a['episodes'])))
                     for a in data['anime']
                     if a['watched_status'] == 'watching']
 
