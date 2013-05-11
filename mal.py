@@ -435,7 +435,7 @@ class Plugin(plugin.Plugin):
             return
 
         watching = [(a['title'],
-                     '%i/%i' % (a['watched_episodes'],
+                     '%s/%s' % (a['watched_episodes'],
                                 self.oiz(a['episodes'])))
                     for a in data['anime']
                     if a['watched_status'] == 'watching']
