@@ -29,11 +29,15 @@ class Plugin(plugin.Plugin):
             self.latest_play = None
 
     def now_playing(self):
-        week = self.get_week()
+        try:
+            week = self.get_week()
+        except:
+            return None
+
         if week['playlist']:
             return week['playlist'][-1]['track']
-        else:
-            return None
+
+        return None
 
     def get_week(self):
         bytes = request.urlopen(self.url).read()
