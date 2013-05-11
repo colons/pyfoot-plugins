@@ -20,8 +20,10 @@ class Plugin(plugin.Plugin):
         self.commands = [
             ('mal search <<query>>', self.search),
             ('mal set <user>', self.define),
-            ('mal <user>', self.summarise),
+            ('mal summarise <user>', self.summarise),
             ('mal', self.summarise_self),
+            ('mal watching <user>', self.watching),
+            ('mal watching', self.watching_self),
             ('mal fight <user1> <user2>', self.fight),
             ('mal fight <user>', self.fight_self),
             ('mal compare <user1> <user2>', self.compare),
@@ -411,6 +413,30 @@ class Plugin(plugin.Plugin):
             query, args)).read().decode('utf-8')
         data = json.loads(raw_data)
         return data
+
+    def watching_self(self, message, args):
+        self.watching(message, {
+            'user': message.nick,
+        })
+
+    def watching(self, message, args):
+        user = self.maluser(args['user'])
+
+        try:
+            data = self.query('animelist/%s' % user)
+        except urllib.error.HTTPError:
+            self.irc.privmsg(message.source,
+                             self.help_missing % user,
+                             pretty=True)
+            return
+
+        watching = [(a['title'],
+                     '%i/%i' % (a['watched_episodes'], a['episodes']))
+                    for a in data['anime']
+                    if a['watched_status'] == 'watching']
+
+        self.send_struc(message.source,
+                        ['%i keions' % len(watching)] + self.select(watching))
 
     def correlate(self, id1, id2):
         print('hi')
