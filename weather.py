@@ -64,7 +64,7 @@ class Plugin(plugin.Plugin):
         """
         Fetches the current weather in `<location>`.
 
-        $<comchar>w c stafford, uk
+        $<comchar>we c stafford, uk
 
         >\x02Stafford, Staffordshire\x02 \x03#|\x03 61\u00b0F \x03#:\x03
         16\u00b0C \x03#|\x03 humidity \x03#:\x03 68% \x03#|\x03 wind
@@ -97,7 +97,7 @@ class Plugin(plugin.Plugin):
         """
         Fetches the weather forecast for `<location>`.
 
-        $<comchar>w f nantwich and crewe
+        $<comchar>we f nantwich and crewe
 
         >\x02Crewe, Cheshire East\x02 \x03#|\x03 \x02mon\x02 \x03#:\x03 high
         70\u00b0F 21\u00b0C \x03#:\x03 low 48\u00b0F 8\u00b0C \x03#:\x03 partly
