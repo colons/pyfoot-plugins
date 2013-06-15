@@ -2,3 +2,4 @@ requests
 chardet2
 hurry.filesize
 feedparser
+twitter
