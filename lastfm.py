@@ -15,7 +15,7 @@ defauts = {
 class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
-            ('lastfm set <user>', self.define),
+            ('set lastfm <user>', self.define),
             ('np', self.now_playing_self),
             ('np <user>', self.now_playing),
         ]

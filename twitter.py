@@ -19,7 +19,7 @@ class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
             ('twitter <<query>>', self.query),
-            ('twitter set <screen_name>', self.set_user),
+            ('set twitter <screen_name>', self.set_user),
             ('twitter', self.self),
         ]
 

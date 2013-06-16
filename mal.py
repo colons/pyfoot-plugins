@@ -20,7 +20,7 @@ class Plugin(plugin.Plugin):
     def register_commands(self):
         self.commands = [
             ('mal search <<query>>', self.search),
-            ('mal set <user>', self.define),
+            ('set mal <user>', self.define),
             ('mal summarise <user>', self.summarise),
             ('mal', self.summarise_self),
             ('mal watching <user>', self.watching),
