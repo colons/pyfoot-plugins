@@ -5,7 +5,6 @@ import json
 from random import choice
 from math import fabs
 from os import path
-import pickle
 import re
 
 import plugin
@@ -15,6 +14,8 @@ class Plugin(plugin.Plugin):
     """
     Fresh MyAnimeList facts, milled from [mal-api.com](http://mal-api.com).
     """
+
+    shelf_required = True
 
     def register_commands(self):
         self.commands = [
@@ -35,20 +36,11 @@ class Plugin(plugin.Plugin):
         self.default_args = ['format=json']
         self.user_file_path = path.expanduser(
             self.conf['content_dir']+'mal')
-        self.malusers = {}
         self.help_setup = (
             "link a MyAnimeList account to your IRC nick with '" +
             self.conf['comchar']+"mal set <account name>'"
         )
         self.help_missing = 'no such MAL user \x02%s\x02'
-
-        try:
-            userfile = open(self.user_file_path, 'rb')
-            self.malusers = pickle.load(userfile)
-            userfile.close()
-        except:
-            print(' :: error reading MAL user pickle, will create one when '
-                  'necessary')
 
     def define(self, message, args):
         """
@@ -69,20 +61,8 @@ class Plugin(plugin.Plugin):
             self.irc.privmsg(message.source,
                              self.help_missing % user, pretty=True)
         else:
-            try:
-                userfile = open(self.user_file_path, 'rb')
-            except IOError:
-                print(' :: error reading MAL user pickle, creating one now')
-                malusers = {}
-            else:
-                malusers = pickle.load(userfile)
-                userfile.close()
-
-            malusers[self.conf.alias+' '+message.nick.lower()] = user
-
-            userfile = open(self.user_file_path, 'wb')
-            pickle.dump(malusers, userfile)
-            userfile.close()
+            self.shelf[message.nick.lower()] = user
+            self.shelf.sync()
             self.irc.privmsg(
                 message.source,
                 '\x02%s\x02 is now MAL user \x02%s\x02 | '
@@ -95,23 +75,7 @@ class Plugin(plugin.Plugin):
         Takes a user - irc or mal - and returns the appropriate MAL username.
         """
 
-        try:
-            userfile = open(self.user_file_path, 'rb')
-        except IOError:
-            print(' :: no MAL user pickle found, ignoring')
-            malusers = {}
-        else:
-            malusers = pickle.load(userfile)
-            userfile.close()
-
-        print(malusers)
-
-        try:
-            maluser = malusers[self.conf.alias+' '+user.lower()]
-        except KeyError:
-            return user
-        else:
-            return maluser
+        return self.shelf.get(user.lower(), user)
 
     def select(self, things, limit=5):
         if len(things) <= limit:
