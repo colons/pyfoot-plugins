@@ -48,6 +48,7 @@ FILESIZES = [
 # Regex range that matches all Unicode characters except the C0 (U+0000-U+001F)
 # and C1 (U+007F-U+009F) control characters and the space (U+0020)
 ALL_CONTROLS_AND_SPACE = '[^\u0000-\u0020\u007f-\u009f]'
+YOUTUBE_API_URL = 'http://www.youtube.com/get_video_info?video_id=%s'
 
 
 def ajax_url(url):
@@ -115,11 +116,13 @@ def html_unescape(text):
 
 class Plugin(plugin.Plugin):
     """ Returns metadata about HTTP URLs. """
-    http_frame = r'(?i).*https?://%s'
+    http_frame = r'(?i).*https?://(www\.)?%s'
 
     def prepare(self):
         self.handlers = [
             (self.http_frame % 'twitter\.com/.*', self.twitter),
+            (self.http_frame % 'youtube\.com/.*', self.youtube),
+            (self.http_frame % 'youtu\.be/.*', self.youtube),
         ]
 
     def postfork(self):
@@ -182,6 +185,27 @@ class Plugin(plugin.Plugin):
         author = tweet['user']
         return ((tweet['text'], '\x02%s\x02 (%s)' % (author['name'],
                                                      author['screen_name'])))
+
+    def youtube(self, url):
+        match = re.search(r'\b[a-zA-Z0-9\-_]{11}\b', url)
+
+        if not match:
+            return None
+
+        video_id = match.group(0)
+
+        resource = requests.get(YOUTUBE_API_URL % video_id)
+        video = urllib.parse.parse_qs(resource.text)
+
+        if video['status'][0] == 'fail':
+            return None
+
+        total_seconds = int(video['length_seconds'][0])
+        seconds = total_seconds % 60
+        minutes = (total_seconds - seconds) / 60
+
+        return (video['title'][0], '%i:%i' % (minutes, seconds),
+                '%s views' % video['view_count'][0])
 
     def title(self, url):
         url_parsed = urllib.parse.urlparse(url)
