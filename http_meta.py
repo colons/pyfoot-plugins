@@ -196,11 +196,17 @@ class Plugin(plugin.Plugin):
         try:
             resource = requests.head(url, headers=request_headers,
                                      allow_redirects=True)
+
+            if resource.status_code == 501:
+                resource = requests.get(url, headers=request_headers,
+                                        allow_redirects=True)
+
             if resource.status_code == 405:
                 request_headers['Range'] = 'bytes=1-5'
                 resource = requests.get(url, headers=request_headers,
                                         allow_redirects=True)
                 del request_headers['Range']
+
             else:
                 resource.raise_for_status()
 
