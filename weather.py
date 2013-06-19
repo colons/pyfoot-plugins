@@ -17,10 +17,17 @@ def f_to_c(f):
 
 
 class Plugin(plugin.Plugin):
+    shelf_required = True
+
     def register_commands(self):
         self.commands = [('weather current <<location>>', self.current),
                          ('weather forecast <<location>>', self.forecast),
-                         ('weather today <<location>>', self.today)]
+                         ('weather today <<location>>', self.today),
+                         ('set weather <<location>>', self.define),
+                         ('weather current', self.foruser(self.current)),
+                         ('weather forecast', self.foruser(self.forecast)),
+                         ('weather today', self.foruser(self.today)),
+                         ('weather', self.foruser(self.today))]
 
     def prepare(self):
         self.url = (
@@ -110,7 +117,6 @@ class Plugin(plugin.Plugin):
         """
 
         url = self.url % ('forecast10day', quote(args["location"]))
-        print(url)
         data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
 
         if 'results' in data['response']:
@@ -161,3 +167,41 @@ class Plugin(plugin.Plugin):
         """ Like the above, but for one day only. """
         args['today'] = True
         self.forecast(message, args)
+
+    def define(self, message, args):
+        """
+        Tell <pyfoot> who you are so you can use the weather commands
+        without specifying a location.
+        """
+
+        url = self.url % ('forecast10day', quote(args["location"]))
+        data = json.loads(urllib.request.urlopen(url).read().decode('utf-8'))
+
+        if 'results' in data['response']:
+            msg = self.suggest(data)
+            self.irc.privmsg(message.source, msg)
+            return
+        elif not 'forecast' in data:
+            raise
+
+        self.shelf[message.nick.lower()] = args['location']
+        self.shelf.sync()
+        self.irc.privmsg(message.source,
+                         '\x02%s\x02 lives in \x02%s\x02'
+                         % (message.nick, args['location']))
+
+    def foruser(self, command):
+        """
+        Return a wrapped command that will add a user's location to a query.
+        """
+
+        def wrapped(message, args):
+            nick = message.nick.lower()
+            if nick in self.shelf:
+                args['location'] = self.shelf[nick]
+                command(message, args)
+            else:
+                self.irc.privmsg(message.source,
+                                 "i don't know where you live :<")
+
+        return wrapped
