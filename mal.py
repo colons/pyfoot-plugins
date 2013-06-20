@@ -47,7 +47,7 @@ class Plugin(plugin.Plugin):
         Many of these functions benefit from knowing whose IRC nicks correspond
         to which MAL user, so be sure to tell <pyfoot> who you are.
 
-        $<comchar>mal set colons
+        $<comchar>set mal colons
 
         >\x02nivi\x02 is now MAL user \x02colons\x02\x03# |\x03
         http://myanimelist.net/profile/\x02colons

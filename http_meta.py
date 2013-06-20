@@ -48,15 +48,21 @@ FILESIZES = [
 # Regex range that matches all Unicode characters except the C0 (U+0000-U+001F)
 # and C1 (U+007F-U+009F) control characters and the space (U+0020)
 ALL_CONTROLS_AND_SPACE = '[^\u0000-\u0020\u007f-\u009f]'
+
 YOUTUBE_API_URL = 'http://www.youtube.com/get_video_info?video_id=%s'
+
+FOURCHAN_API_URL = 'http://api.4chan.org/'
+FOURCHAN_POST_API = FOURCHAN_API_URL + '%s/res/%s'
 
 
 def ajax_url(url):
     """
-    AJAX HTML snapshot URL parsing, pretty much required for a modern scraper.
-    https://developers.google.com/webmasters/ajax-crawling/docs/specification
+    AJAX HTML snapshot URL parsing
+
     Take a URL string, turn its #! fragment into the prescribed query, and
     return a string.
+
+    https://developers.google.com/webmasters/ajax-crawling/docs/specification
     """
 
     hashbang_index = url.find('#!')
@@ -72,7 +78,8 @@ def ajax_url(url):
 def prettify_url(url):
     """
     Remove URL baggage to display a clean hostname/path.
-    Returns a string when passed a string or a urlparse.ParseResult.
+
+    Returns a string when passed either a string or a urlparse.ParseResult.
     """
 
     if not isinstance(url, urllib.parse.ParseResult):
@@ -123,6 +130,7 @@ class Plugin(plugin.Plugin):
             (self.http_frame % 'twitter\.com/.*', self.twitter),
             (self.http_frame % 'youtube\.com/.*', self.youtube),
             (self.http_frame % 'youtu\.be/.*', self.youtube),
+            (self.http_frame % '(boards\.)?4chan.com/.*', self.fourchan),
         ]
 
     def postfork(self):
@@ -206,6 +214,9 @@ class Plugin(plugin.Plugin):
 
         return (video['title'][0], '%i:%i' % (minutes, seconds),
                 '%s views' % video['view_count'][0])
+
+    def fourchan(self, url):
+        threadmatch = re.search(url, url)
 
     def title(self, url):
         url_parsed = urllib.parse.urlparse(url)

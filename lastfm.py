@@ -48,7 +48,7 @@ class Plugin(plugin.Plugin):
         """
         Let <pyfoot> know who you are.
 
-        $<comchar>lastfm set nivijh
+        $<comchar>set lastfm nivijh
 
         >\x02nivi\x02 is now Last.fm user \x02NiviJh\x02\x03# |\x03
         http://www.last.fm/user/\x02NiviJh\x02
