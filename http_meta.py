@@ -212,7 +212,7 @@ class Plugin(plugin.Plugin):
         seconds = total_seconds % 60
         minutes = (total_seconds - seconds) / 60
 
-        return (video['title'][0], '%i:%i' % (minutes, seconds),
+        return (video['title'][0], '%i:%02i' % (minutes, seconds),
                 '%s views' % video['view_count'][0])
 
     def fourchan(self, url):
