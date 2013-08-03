@@ -5,6 +5,7 @@ import urllib.parse
 import urllib.error
 import time
 from http.server import BaseHTTPRequestHandler
+from html.parser import HTMLParser
 
 import requests
 import chardet
@@ -135,6 +136,7 @@ class Plugin(plugin.Plugin):
 
     def postfork(self):
         self.tw_api = Twitter(auth=OAuth(**self.conf['twitter_oath']))
+        self.parser = HTMLParser()
 
     def register_commands(self):
         self.regexes = [
@@ -191,8 +193,8 @@ class Plugin(plugin.Plugin):
 
         tweet = self.tw_api.statuses.show(id=tweet_id)
         author = tweet['user']
-        return ((tweet['text'], '\x02%s\x02 (%s)' % (author['name'],
-                                                     author['screen_name'])))
+        return ((self.parser.unescape(tweet['text']),
+                 '\x02%s\x02 (%s)' % (author['name'], author['screen_name'])))
 
     def youtube(self, url):
         match = re.search(r'\b[a-zA-Z0-9\-_]{11}\b', url)

@@ -1,3 +1,5 @@
+from html.parser import HTMLParser
+
 from twitter import Twitter, OAuth
 
 import plugin
@@ -15,6 +17,7 @@ class Plugin(plugin.Plugin):
 
     def postfork(self):
         self.tw_api = Twitter(auth=OAuth(**self.conf['twitter_oath']))
+        self.parser = HTMLParser()
 
     def register_commands(self):
         self.commands = [
@@ -44,7 +47,7 @@ class Plugin(plugin.Plugin):
 
     def send_tweet(self, message, tweet):
         self.send_struc(message.source,
-                        (tweet['text'],
+                        (self.parser.unescape(tweet['text']),
                          'http://twitter.com/%s/status/%s'
                          % (tweet['user']['screen_name'],
                             tweet['id_str']))
